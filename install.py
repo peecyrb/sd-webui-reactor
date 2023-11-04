@@ -95,19 +95,16 @@ except:
 with open(req_file) as file:
     install_count = 0
     try:
+        ort = "onnxruntime-gpu"
         import torch.cuda as cuda
         if cuda.is_available():
-            ort = "onnxruntime-gpu"
             if first_run:
                 last_device = "CUDA"
-            with open(os.path.join(BASE_PATH, "last_device.txt"), "w") as txt:
-                txt.write(last_device)
         else:
-            ort = "onnxruntime"
             if last_device == "CUDA":
                 last_device = "CPU"
-            with open("last_device.txt", "w") as txt:
-                txt.write(last_device)
+        with open(os.path.join(BASE_PATH, "last_device.txt"), "w") as txt:
+            txt.write(last_device)
         if not is_installed(ort,"1.16.1",False):
             install_count += 1
             run_pip(ort)

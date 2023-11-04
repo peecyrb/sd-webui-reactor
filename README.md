@@ -198,7 +198,7 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
 7. Then one-by-one:
    - `pip install insightface==0.7.3`
    - `pip install onnx`
-   - `pip install onnxruntime-gpu>=1.16.1` if you have CUDA, otherwise `pip install onnxruntime`
+   - `pip install onnxruntime-gpu>=1.16.1`
    - `pip install opencv-python`
    - `pip install tqdm`
 8. Type `deactivate`, you can close your Terminal or Console and start your SD WebUI, ReActor should start OK - if not, welcome to the Issues section.
@@ -233,9 +233,9 @@ and put it to the `stable-diffusion-webui\models\insightface` replacing existing
 4. Then:
 - `python -m pip install -U pip`
 - `pip uninstall -y onnxruntime onnxruntime-gpu onnxruntime-silicon onnxruntime-extensions`
-- `pip install onnxruntime-gpu>=1.16.1` if you have CUDA, otherwise `pip install onnxruntime`
+- `pip install onnxruntime-gpu>=1.16.1`
 
-If it didn't help - it seems that you have another extension reinstalling `onnxruntime` when SD WebUI checks requirements. Please see your extensions list. Some extensions can causes reinstalling of `onnxruntime` or `onnxruntime-gpu` to `onnxruntime<1.16.1` every time SD WebUI runs.<br>ORT 1.16.0 has a bug https://github.com/microsoft/onnxruntime/issues/17631 - don't install it!
+If it didn't help - it seems that you have another extension reinstalling `onnxruntime` when SD WebUI checks requirements. Please see your extensions list. Some extensions can causes reinstalling of `onnxruntime-gpu` to `onnxruntime<1.16.1` every time SD WebUI runs.<br>ORT 1.16.0 has a bug https://github.com/microsoft/onnxruntime/issues/17631 - don't install it!
 
 ### **VII. "ImportError: cannot import name 'builder' from 'google.protobuf.internal'"**
 
