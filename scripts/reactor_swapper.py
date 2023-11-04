@@ -1,8 +1,7 @@
 import copy
 import os
 from dataclasses import dataclass
-from typing import List, Union, Tuple
-from functools import lru_cache
+from typing import List, Union
 
 import cv2
 import numpy as np
@@ -95,17 +94,7 @@ def getAnalysisModel():
         )
     return ANALYSIS_MODEL
 
-@lru_cache(maxsize=3)
-def getAnalysisModel_CUDA(det_size: Tuple[int, int] = (640, 640)):
-    global ANALYSIS_MODEL
-    if ANALYSIS_MODEL is None:
-        ANALYSIS_MODEL = insightface.app.FaceAnalysis(
-            name="buffalo_l", providers=PROVIDERS, root=os.path.join(models_path, "insightface") # note: allowed_modules=['detection', 'genderage']
-        )
-    ANALYSIS_MODEL.prepare(ctx_id=0, det_size=det_size)
-    return ANALYSIS_MODEL
 
-@lru_cache(maxsize=1)
 def getFaceSwapModel(model_path: str):
     global FS_MODEL
     global CURRENT_FS_MODEL_PATH
@@ -233,11 +222,8 @@ def half_det_size(det_size):
 
 def analyze_faces(img_data: np.ndarray, det_size=(640, 640)):
     logger.info("Applied Execution Provider: %s", PROVIDERS[0])
-    if DEVICE == "CUDA":
-        face_analyser = getAnalysisModel_CUDA(det_size)
-    else:
-        face_analyser = copy.deepcopy(getAnalysisModel())
-        face_analyser.prepare(ctx_id=0, det_size=det_size)
+    face_analyser = copy.deepcopy(getAnalysisModel())
+    face_analyser.prepare(ctx_id=0, det_size=det_size)
     return face_analyser.get(img_data)
 
 def get_face_single(img_data: np.ndarray, face, face_index=0, det_size=(640, 640), gender_source=0, gender_target=0):
