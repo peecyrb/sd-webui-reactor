@@ -70,7 +70,8 @@ def reactor_api(_: gr.Blocks, app: FastAPI):
         gender_source: int = Body(0,title="Gender Detection (Source) (0 - No, 1 - Female Only, 2 - Male Only)"),
         gender_target: int = Body(0,title="Gender Detection (Target) (0 - No, 1 - Female Only, 2 - Male Only)"),
         save_to_file: int = Body(0,title="Save Result to file, 0 - No, 1 - Yes"),
-        result_file_path: str = Body("",title="(if 'save_to_file = 1') Result file path")
+        result_file_path: str = Body("",title="(if 'save_to_file = 1') Result file path"),
+        device: str = Body("CPU",title="CPU or CUDA (if you have it)")
     ):
         s_image = api.decode_base64_to_image(source_image)
         t_image = api.decode_base64_to_image(target_image)
@@ -83,7 +84,7 @@ def reactor_api(_: gr.Blocks, app: FastAPI):
         use_model = get_full_model(model)
         if use_model is None:
             Exception("Model not found")
-        result = swap_face(s_image, t_image, use_model, sf_index, f_index, up_options, gender_s, gender_t)
+        result = swap_face(s_image, t_image, use_model, sf_index, f_index, up_options, gender_s, gender_t, True, True, device)
         if save_to_file == 1:
             if result_file_path == "":
                 result_file_path = default_file_path()

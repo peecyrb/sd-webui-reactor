@@ -8,6 +8,17 @@ import hashlib
 
 from modules.images import FilenameGenerator, get_next_sequence_number
 from modules import shared, script_callbacks
+from scripts.reactor_globals import DEVICE, BASE_PATH
+
+def set_Device(value):
+    global DEVICE
+    DEVICE = value
+    with open(os.path.join(BASE_PATH, "last_device.txt"), "w") as txt:
+        txt.write(DEVICE)
+
+def get_Device():
+    global DEVICE
+    return DEVICE
 
 def make_grid(image_list: List):
     

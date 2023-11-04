@@ -1,6 +1,7 @@
 import os, glob
 import gradio as gr
 from PIL import Image
+import torch.cuda as cuda
 
 from typing import List
 
@@ -26,7 +27,8 @@ from scripts.reactor_logger import logger
 from scripts.reactor_swapper import EnhancementOptions, swap_face, check_process_halt, reset_messaged
 from scripts.reactor_version import version_flag, app_title
 from scripts.console_log_patch import apply_logging_patch
-from scripts.reactor_helpers import make_grid, get_image_path
+from scripts.reactor_helpers import make_grid, get_image_path, set_Device
+from scripts.reactor_globals import DEVICE, DEVICE_LIST
 
 
 MODELS_PATH = None
@@ -134,6 +136,26 @@ class FaceSwapScript(scripts.Script):
                     )
             with gr.Tab("Settings"):
                 models = get_models()
+                if cuda.is_available():
+                    with gr.Row():
+                        device = gr.Radio(
+                            label="Execution Provider",
+                            choices=DEVICE_LIST,
+                            value=DEVICE,
+                            type="value",
+                            info="If you already run 'Generate' - RESTART is required to apply. Click 'Save', (A1111) Extensions Tab -> 'Apply and restart UI' or (SD.Next) close the Server and start it again",
+                            scale=2,
+                        )
+                        save_device_btn = gr.Button("Save", scale=0)
+                    save = gr.Markdown("")
+                    setattr(device, "do_not_save_to_config", True)
+                    save_device_btn.click(
+                        set_Device,
+                        inputs=[device],
+                        outputs=[save],
+                    )
+                else:
+                    device = "CPU"
                 with gr.Row():
                     if len(models) == 0:
                         logger.warning(
@@ -163,7 +185,7 @@ class FaceSwapScript(scripts.Script):
                     target_hash_check = gr.Checkbox(
                         False,
                         label="Target Image Hash Check",
-                        info="Affects if you use img2img with only 'Swap in source image' option."
+                        info="Affects if you use Extras tab or img2img with only 'Swap in source image' on."
                     )
 
         return [
@@ -187,6 +209,7 @@ class FaceSwapScript(scripts.Script):
             codeformer_weight,
             source_hash_check,
             target_hash_check,
+            device,
         ]
 
 
@@ -239,6 +262,7 @@ class FaceSwapScript(scripts.Script):
         codeformer_weight,
         source_hash_check,
         target_hash_check,
+        device,
     ):
         self.enable = enable
         if self.enable:
@@ -254,7 +278,8 @@ class FaceSwapScript(scripts.Script):
             self.upscaler_visibility = upscaler_visibility
             self.face_restorer_visibility = face_restorer_visibility
             self.restore_first = restore_first
-            self.upscaler_name = upscaler_name       
+            self.upscaler_name = upscaler_name  
+            self.swap_in_source = swap_in_source
             self.swap_in_generated = swap_in_generated
             self.model = os.path.join(MODELS_PATH,model)
             self.console_logging_level = console_logging_level
@@ -264,6 +289,7 @@ class FaceSwapScript(scripts.Script):
             self.codeformer_weight = codeformer_weight
             self.source_hash_check = source_hash_check
             self.target_hash_check = target_hash_check
+            self.device = device
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -285,9 +311,11 @@ class FaceSwapScript(scripts.Script):
             if self.target_hash_check is None:
                 self.target_hash_check = False
 
+            set_Device(self.device)
+            
             if self.source is not None:
                 apply_logging_patch(console_logging_level)
-                if isinstance(p, StableDiffusionProcessingImg2Img) and swap_in_source:
+                if isinstance(p, StableDiffusionProcessingImg2Img) and self.swap_in_source:
                     logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
 
                     for i in range(len(p.init_images)):
@@ -304,6 +332,7 @@ class FaceSwapScript(scripts.Script):
                             gender_target=self.gender_target,
                             source_hash_check=self.source_hash_check,
                             target_hash_check=self.target_hash_check,
+                            device=self.device,
                         )
                         p.init_images[i] = result
                         # result_path = get_image_path(p.init_images[i], p.outpath_samples, "", p.all_seeds[i], p.all_prompts[i], "txt", p=p, suffix="-swapped")
@@ -354,6 +383,7 @@ class FaceSwapScript(scripts.Script):
                                 gender_target=self.gender_target,
                                 source_hash_check=self.source_hash_check,
                                 target_hash_check=self.target_hash_check,
+                                device=self.device,
                             )
                             if result is not None and swapped > 0:
                                 result_images.append(result)
@@ -410,6 +440,7 @@ class FaceSwapScript(scripts.Script):
                     gender_target=self.gender_target,
                     source_hash_check=self.source_hash_check,
                     target_hash_check=self.target_hash_check,
+                    device=self.device,
                 )
                 try:
                     pp = scripts_postprocessing.PostprocessedImage(result)
@@ -436,7 +467,6 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                 with gr.Column():
                     img = gr.Image(type="pil")
                     enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
-                    gr.Markdown("<br>")
                     gr.Markdown("Source Image (above):")
                     with gr.Row():
                         source_faces_index = gr.Textbox(
@@ -450,7 +480,6 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                             label="Gender Detection (Source)",
                             type="index",
                         )
-                    gr.Markdown("<br>")
                     gr.Markdown("Target Image (result):")
                     with gr.Row():
                         faces_index = gr.Textbox(
@@ -464,7 +493,6 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                             label="Gender Detection (Target)",
                             type="index",
                         )
-                    gr.Markdown("<br>")
                     with gr.Row():
                         face_restorer_name = gr.Radio(
                             label="Restore Face",
@@ -479,7 +507,6 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                             codeformer_weight = gr.Slider(
                                 0, 1, 0.5, step=0.1, label="CodeFormer Weight", info="0 = maximum effect, 1 = minimum effect"
                             )
-                    gr.Markdown("<br>")
 
             with gr.Tab("Upscale"):
                 restore_first = gr.Checkbox(
@@ -493,7 +520,6 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                     value="None",
                     info="Won't scale if you choose -Swap in Source- via img2img, only 1x-postprocessing will affect (texturing, denoising, restyling etc.)"
                 )
-                gr.Markdown("<br>")
                 with gr.Row():
                     upscaler_scale = gr.Slider(1, 8, 1, step=0.1, label="Scale by")
                     upscaler_visibility = gr.Slider(
@@ -501,6 +527,26 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                     )
             with gr.Tab("Settings"):
                 models = get_models()
+                if cuda.is_available():
+                    with gr.Row():
+                        device = gr.Radio(
+                            label="Execution Provider",
+                            choices=DEVICE_LIST,
+                            value=DEVICE,
+                            type="value",
+                            info="If you already run 'Generate' - RESTART is required to apply. Click 'Save', (A1111) Extensions Tab -> 'Apply and restart UI' or (SD.Next) close the Server and start it again",
+                            scale=2,
+                        )
+                        save_device_btn = gr.Button("Save", scale=0)
+                    save = gr.Markdown("")
+                    setattr(device, "do_not_save_to_config", True)
+                    save_device_btn.click(
+                        set_Device,
+                        inputs=[device],
+                        outputs=[save],
+                    )
+                else:
+                    device = "CPU"
                 with gr.Row():
                     if len(models) == 0:
                         logger.warning(
@@ -520,18 +566,6 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                         label="Console Log Level",
                         type="index",
                     )
-                gr.Markdown("<br>")
-                with gr.Row():
-                    source_hash_check = gr.Checkbox(
-                        True,
-                        label="Source Image Hash Check",
-                        info="Recommended to keep it ON. Processing is faster when Source Image is the same."
-                    )
-                    target_hash_check = gr.Checkbox(
-                        False,
-                        label="Target Image Hash Check",
-                        info="Affects if you use img2img with only 'Swap in source image' option."
-                    )
 
         args = {
             'img': img,
@@ -549,8 +583,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             'gender_source': gender_source,
             'gender_target': gender_target,
             'codeformer_weight': codeformer_weight,
-            'source_hash_check': source_hash_check,
-            'target_hash_check': target_hash_check,
+            'device': device,
         }
         return args
 
@@ -599,8 +632,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             self.gender_source = args['gender_source']
             self.gender_target = args['gender_target']
             self.codeformer_weight = args['codeformer_weight']
-            self.source_hash_check = args['source_hash_check']
-            self.target_hash_check = args['target_hash_check']
+            self.device = args['device']
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -615,17 +647,16 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                 self.source_faces_index = [0]
             if len(self.faces_index) == 0:
                 self.faces_index = [0]
-            if self.source_hash_check is None:
-                self.source_hash_check = True
-            if self.target_hash_check is None:
-                self.target_hash_check = False
 
             current_job_number = shared.state.job_no + 1
             job_count = shared.state.job_count
             if current_job_number == job_count:
                 reset_messaged()
 
+            set_Device(self.device)
+            
             if self.source is not None:
+                apply_logging_patch(self.console_logging_level)
                 logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
                 image: Image.Image = pp.image
                 result, output, swapped = swap_face(
@@ -637,12 +668,14 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                     enhancement_options=self.enhancement_options,
                     gender_source=self.gender_source,
                     gender_target=self.gender_target,
-                    source_hash_check=self.source_hash_check,
-                    target_hash_check=self.target_hash_check,
+                    source_hash_check=True,
+                    target_hash_check=True,
+                    device=self.device,
                 )
                 try:
                     pp.info["ReActor"] = True
                     pp.image = result
+                    logger.status("---Done!---")
                 except Exception:
                     logger.error("Cannot create a result image")
             else:

@@ -1,7 +1,8 @@
 import copy
 import os
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Union, Tuple
+from functools import lru_cache
 
 import cv2
 import numpy as np
@@ -9,7 +10,7 @@ from PIL import Image
 
 import insightface
 
-from scripts.reactor_helpers import get_image_md5hash
+from scripts.reactor_helpers import get_image_md5hash, get_Device
 from modules.face_restoration import FaceRestoration
 try: # A1111
     from modules import codeformer_model
@@ -31,7 +32,12 @@ import warnings
 np.warnings = warnings
 np.warnings.filterwarnings('ignore')
 
-providers = ["CPUExecutionProvider"]
+
+DEVICE = get_Device()
+if DEVICE == "CUDA":
+    PROVIDERS = ["CUDAExecutionProvider"]
+else:
+    PROVIDERS = ["CPUExecutionProvider"]
 
 
 @dataclass
@@ -80,21 +86,32 @@ SOURCE_IMAGE_HASH = None
 TARGET_FACES = None
 TARGET_IMAGE_HASH = None
 
+
 def getAnalysisModel():
     global ANALYSIS_MODEL
     if ANALYSIS_MODEL is None:
         ANALYSIS_MODEL = insightface.app.FaceAnalysis(
-            name="buffalo_l", providers=providers, root=os.path.join(models_path, "insightface") # note: allowed_modules=['detection', 'genderage']
+            name="buffalo_l", providers=PROVIDERS, root=os.path.join(models_path, "insightface") # note: allowed_modules=['detection', 'genderage']
         )
     return ANALYSIS_MODEL
 
+@lru_cache(maxsize=3)
+def getAnalysisModel_CUDA(det_size: Tuple[int, int] = (640, 640)):
+    global ANALYSIS_MODEL
+    if ANALYSIS_MODEL is None:
+        ANALYSIS_MODEL = insightface.app.FaceAnalysis(
+            name="buffalo_l", providers=PROVIDERS, root=os.path.join(models_path, "insightface") # note: allowed_modules=['detection', 'genderage']
+        )
+    ANALYSIS_MODEL.prepare(ctx_id=0, det_size=det_size)
+    return ANALYSIS_MODEL
 
+@lru_cache(maxsize=1)
 def getFaceSwapModel(model_path: str):
     global FS_MODEL
     global CURRENT_FS_MODEL_PATH
     if CURRENT_FS_MODEL_PATH is None or CURRENT_FS_MODEL_PATH != model_path:
         CURRENT_FS_MODEL_PATH = model_path
-        FS_MODEL = insightface.model_zoo.get_model(model_path, providers=providers)
+        FS_MODEL = insightface.model_zoo.get_model(model_path, providers=PROVIDERS)
 
     return FS_MODEL
 
@@ -210,17 +227,17 @@ def get_face_age(face, face_index):
         return "None"
     return face_age
 
-# def reget_face_single(img_data: np.ndarray, face, det_size, face_index, gender_source, gender_target):
-#     det_size_half = (det_size[0] // 2, det_size[1] // 2)
-#     return get_face_single(img_data, face, face_index=face_index, det_size=det_size_half, gender_source=gender_source, gender_target=gender_target)
-
 def half_det_size(det_size):
     logger.status("Trying to halve 'det_size' parameter")
     return (det_size[0] // 2, det_size[1] // 2)
 
 def analyze_faces(img_data: np.ndarray, det_size=(640, 640)):
-    face_analyser = copy.deepcopy(getAnalysisModel())
-    face_analyser.prepare(ctx_id=0, det_size=det_size)
+    logger.info("Applied Execution Provider: %s", PROVIDERS[0])
+    if DEVICE == "CUDA":
+        face_analyser = getAnalysisModel_CUDA(det_size)
+    else:
+        face_analyser = copy.deepcopy(getAnalysisModel())
+        face_analyser.prepare(ctx_id=0, det_size=det_size)
     return face_analyser.get(img_data)
 
 def get_face_single(img_data: np.ndarray, face, face_index=0, det_size=(640, 640), gender_source=0, gender_target=0):
@@ -278,9 +295,12 @@ def swap_face(
     gender_target: int = 0,
     source_hash_check: bool = True,
     target_hash_check: bool = False,
+    device: str = "CPU",
 ):
-    global SOURCE_FACES, SOURCE_IMAGE_HASH, TARGET_FACES, TARGET_IMAGE_HASH
+    global SOURCE_FACES, SOURCE_IMAGE_HASH, TARGET_FACES, TARGET_IMAGE_HASH, PROVIDERS
     result_image = target_img
+
+    PROVIDERS = ["CUDAExecutionProvider"] if device == "CUDA" else ["CPUExecutionProvider"]
     
     if check_process_halt():
         return result_image, [], 0

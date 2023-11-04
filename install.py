@@ -1,5 +1,6 @@
 import subprocess
 import os, sys
+from typing import Any
 import pkg_resources
 from tqdm import tqdm
 import urllib.request
@@ -13,7 +14,10 @@ except:
     except:
         model_path = os.path.abspath("models")
 
-req_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "requirements.txt")
+
+BASE_PATH = os.path.dirname(os.path.realpath(__file__))
+
+req_file = os.path.join(BASE_PATH, "requirements.txt")
 
 models_dir_old = os.path.join(models_path, "roop")
 models_dir = os.path.join(models_path, "insightface")
@@ -34,6 +38,10 @@ if os.path.exists(models_dir_old):
 model_url = "https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128.onnx"
 model_name = os.path.basename(model_url)
 model_path = os.path.join(models_dir, model_name)
+
+def get_sd_option(name: str, default: Any) -> Any:
+    assert shared.opts.data is not None
+    return shared.opts.data.get(name, default)
 
 def run_pip(*args):
     subprocess.run([sys.executable, "-m", "pip", "install", *args])
@@ -68,9 +76,46 @@ if not os.path.exists(models_dir):
 if not os.path.exists(model_path):
     download(model_url, model_path)
 
-print("Checking ReActor requirements...", end=' ')
+print("ReActor preheating...", end=' ')
+
+last_device = None
+first_run = False
+
+try:
+    last_device_log = os.path.join(BASE_PATH, "last_device.txt")
+    with open(last_device_log) as f:
+        for el in f:
+            last_device = el.strip()
+except:
+    last_device = "CPU"
+    first_run = True
+    with open(os.path.join(BASE_PATH, "last_device.txt"), "w") as txt:
+        txt.write(last_device)
+
 with open(req_file) as file:
     install_count = 0
+    try:
+        import torch.cuda as cuda
+        if cuda.is_available():
+            ort = "onnxruntime-gpu"
+            if first_run:
+                last_device = "CUDA"
+            with open(os.path.join(BASE_PATH, "last_device.txt"), "w") as txt:
+                txt.write(last_device)
+        else:
+            ort = "onnxruntime"
+            if last_device == "CUDA":
+                last_device = "CPU"
+            with open("last_device.txt", "w") as txt:
+                txt.write(last_device)
+        if not is_installed(ort,"1.16.1",False):
+            install_count += 1
+            run_pip(ort)
+    except Exception as e:
+        print(e)
+        print(f"\nERROR: Failed to install {ort} - ReActor won't start")
+        raise e
+    print(f"Device: {last_device}")
     strict = True
     for package in file:
         package_version = None
@@ -89,6 +134,8 @@ with open(req_file) as file:
             print(f"\nERROR: Failed to install {package} - ReActor won't start")
             raise e
     if install_count > 0:
-        print(f'\n--- PLEASE, RESTART the Server! ---\n')
-    else:
-        print('Ok')
+        print(f"""
+        +---------------------------------+
+        --- PLEASE, RESTART the Server! ---
+        +---------------------------------+
+        """)
