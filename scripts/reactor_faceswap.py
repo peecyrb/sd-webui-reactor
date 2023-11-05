@@ -3,8 +3,9 @@ import gradio as gr
 from PIL import Image
 try:
     import torch.cuda as cuda
+    EP_is_visible = True if cuda.is_available() else False
 except:
-    cuda = None
+    EP_is_visible = False
 
 from typing import List
 
@@ -139,29 +140,23 @@ class FaceSwapScript(scripts.Script):
                     )
             with gr.Tab("Settings"):
                 models = get_models()
-                if cuda is not None:
-                    if cuda.is_available():
-                        with gr.Row():
-                            device = gr.Radio(
-                                label="Execution Provider",
-                                choices=DEVICE_LIST,
-                                value=DEVICE,
-                                type="value",
-                                info="If you already run 'Generate' - RESTART is required to apply. Click 'Save', (A1111) Extensions Tab -> 'Apply and restart UI' or (SD.Next) close the Server and start it again",
-                                scale=2,
-                            )
-                            save_device_btn = gr.Button("Save", scale=0)
-                        save = gr.Markdown("")
-                        setattr(device, "do_not_save_to_config", True)
-                        save_device_btn.click(
-                            set_Device,
-                            inputs=[device],
-                            outputs=[save],
-                        )
-                    else:
-                        device = "CPU"
-                else:
-                    device = "CPU"
+                with gr.Row(visible=EP_is_visible):
+                    device = gr.Radio(
+                        label="Execution Provider",
+                        choices=DEVICE_LIST,
+                        value=DEVICE,
+                        type="value",
+                        info="If you already run 'Generate' - RESTART is required to apply. Click 'Save', (A1111) Extensions Tab -> 'Apply and restart UI' or (SD.Next) close the Server and start it again",
+                        scale=2,
+                    )
+                    save_device_btn = gr.Button("Save", scale=0)
+                save = gr.Markdown("", visible=EP_is_visible)
+                setattr(device, "do_not_save_to_config", True)
+                save_device_btn.click(
+                    set_Device,
+                    inputs=[device],
+                    outputs=[save],
+                )
                 with gr.Row():
                     if len(models) == 0:
                         logger.warning(
@@ -533,26 +528,23 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                     )
             with gr.Tab("Settings"):
                 models = get_models()
-                if cuda.is_available():
-                    with gr.Row():
-                        device = gr.Radio(
-                            label="Execution Provider",
-                            choices=DEVICE_LIST,
-                            value=DEVICE,
-                            type="value",
-                            info="If you already run 'Generate' - RESTART is required to apply. Click 'Save', (A1111) Extensions Tab -> 'Apply and restart UI' or (SD.Next) close the Server and start it again",
-                            scale=2,
-                        )
-                        save_device_btn = gr.Button("Save", scale=0)
-                    save = gr.Markdown("")
-                    setattr(device, "do_not_save_to_config", True)
-                    save_device_btn.click(
-                        set_Device,
-                        inputs=[device],
-                        outputs=[save],
+                with gr.Row(visible=EP_is_visible):
+                    device = gr.Radio(
+                        label="Execution Provider",
+                        choices=DEVICE_LIST,
+                        value=DEVICE,
+                        type="value",
+                        info="If you already run 'Generate' - RESTART is required to apply. Click 'Save', (A1111) Extensions Tab -> 'Apply and restart UI' or (SD.Next) close the Server and start it again",
+                        scale=2,
                     )
-                else:
-                    device = "CPU"
+                    save_device_btn = gr.Button("Save", scale=0)
+                save = gr.Markdown("", visible=EP_is_visible)
+                setattr(device, "do_not_save_to_config", True)
+                save_device_btn.click(
+                    set_Device,
+                    inputs=[device],
+                    outputs=[save],
+                )
                 with gr.Row():
                     if len(models) == 0:
                         logger.warning(
