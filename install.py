@@ -39,10 +39,6 @@ model_url = "https://github.com/facefusion/facefusion-assets/releases/download/m
 model_name = os.path.basename(model_url)
 model_path = os.path.join(models_dir, model_name)
 
-def get_sd_option(name: str, default: Any) -> Any:
-    assert shared.opts.data is not None
-    return shared.opts.data.get(name, default)
-
 def pip_install(*args):
     subprocess.run([sys.executable, "-m", "pip", "install", *args])
 
