@@ -97,9 +97,9 @@ except:
 
 with open(req_file) as file:
     install_count = 0
+    ort = "onnxruntime-gpu"
+    import torch
     try:
-        ort = "onnxruntime-gpu"
-        import torch
         if torch.cuda.is_available():
             if first_run:
                 last_device = "CUDA"
