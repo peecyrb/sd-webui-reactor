@@ -114,7 +114,7 @@ with open(req_file) as file:
             txt.write(last_device)
         if not is_installed(ort,"1.16.1",False):
             install_count += 1
-            pip_install(ort)
+            pip_install(ort, "-U")
     except Exception as e:
         print(e)
         print(f"\nERROR: Failed to install {ort} - ReActor won't start")

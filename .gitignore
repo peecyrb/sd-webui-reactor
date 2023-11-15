@@ -6,5 +6,5 @@ __pycache__/
 .vscode/
 
 example
-toDo.txt
-last_device.txt
+*.txt
+!requirements.txt
