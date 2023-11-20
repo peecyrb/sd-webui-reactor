@@ -28,6 +28,16 @@ except:
 
 import warnings
 
+PILImage = Image.Image
+CV2ImgU8 = np.ndarray[int, np.dtype[uint8]]
+Face = IFace
+BoxCoords = Tuple[int, int, int, int]
+
+
+class Gender(Enum):
+    AUTO = -1
+    FEMALE = 0
+    MALE = 1
 np.warnings = warnings
 np.warnings.filterwarnings('ignore')
 
@@ -453,3 +463,101 @@ def swap_face(
             logger.status("No source face(s) found")
     
     return result_image, output, swapped
+
+
+def merge_images_with_mask(
+    image1: CV2ImgU8, image2: CV2ImgU8, mask: CV2ImgU8
+) -> CV2ImgU8:
+    """
+    Merges two images using a given mask. The regions where the mask is set will be replaced with the corresponding
+    areas of the second image.
+
+    Args:
+        image1 (CV2Img): The base image, which must have the same shape as image2.
+        image2 (CV2Img): The image to be merged, which must have the same shape as image1.
+        mask (CV2Img): A binary mask specifying the regions to be merged. The mask shape should match image1's first two dimensions.
+
+    Returns:
+        CV2Img: The merged image.
+
+    Raises:
+        ValueError: If the shapes of the images and mask do not match.
+    """
+
+    if image1.shape != image2.shape or image1.shape[:2] != mask.shape:
+        raise ValueError("Img should have the same shape")
+    mask = mask.astype(np.uint8)
+    masked_region = cv2.bitwise_and(image2, image2, mask=mask)
+    inverse_mask = cv2.bitwise_not(mask)
+    empty_region = cv2.bitwise_and(image1, image1, mask=inverse_mask)
+    merged_image = cv2.add(empty_region, masked_region)
+    return merged_image
+
+
+def erode_mask(mask: CV2ImgU8, kernel_size: int = 3, iterations: int = 1) -> CV2ImgU8:
+    """
+    Erodes a binary mask using a given kernel size and number of iterations.
+
+    Args:
+        mask (CV2Img): The binary mask to erode.
+        kernel_size (int, optional): The size of the kernel. Default is 3.
+        iterations (int, optional): The number of erosion iterations. Default is 1.
+
+    Returns:
+        CV2Img: The eroded mask.
+    """
+    kernel = np.ones((kernel_size, kernel_size), np.uint8)
+    eroded_mask = cv2.erode(mask, kernel, iterations=iterations)
+    return eroded_mask
+
+
+def apply_gaussian_blur(
+    mask: CV2ImgU8, kernel_size: Tuple[int, int] = (5, 5), sigma_x: int = 0
+) -> CV2ImgU8:
+    """
+    Applies a Gaussian blur to a mask.
+
+    Args:
+        mask (CV2Img): The mask to blur.
+        kernel_size (tuple, optional): The size of the kernel, e.g. (5, 5). Default is (5, 5).
+        sigma_x (int, optional): The standard deviation in the X direction. Default is 0.
+
+    Returns:
+        CV2Img: The blurred mask.
+    """
+    blurred_mask = cv2.GaussianBlur(mask, kernel_size, sigma_x)
+    return blurred_mask
+
+
+def dilate_mask(mask: CV2ImgU8, kernel_size: int = 5, iterations: int = 1) -> CV2ImgU8:
+    """
+    Dilates a binary mask using a given kernel size and number of iterations.
+
+    Args:
+        mask (CV2Img): The binary mask to dilate.
+        kernel_size (int, optional): The size of the kernel. Default is 5.
+        iterations (int, optional): The number of dilation iterations. Default is 1.
+
+    Returns:
+        CV2Img: The dilated mask.
+    """
+    kernel = np.ones((kernel_size, kernel_size), np.uint8)
+    dilated_mask = cv2.dilate(mask, kernel, iterations=iterations)
+    return dilated_mask
+
+
+def get_face_mask(aimg: CV2ImgU8, bgr_fake: CV2ImgU8) -> CV2ImgU8:
+    """
+    Generates a face mask by performing bitwise OR on two face masks and then dilating the result.
+
+    Args:
+        aimg (CV2Img): Input image for generating the first face mask.
+        bgr_fake (CV2Img): Input image for generating the second face mask.
+
+    Returns:
+        CV2Img: The combined and dilated face mask.
+    """
+    mask1 = generate_face_mask(aimg, device=shared.device)
+    mask2 = generate_face_mask(bgr_fake, device=shared.device)
+    mask = dilate_mask(cv2.bitwise_or(mask1, mask2))
+    return mask
