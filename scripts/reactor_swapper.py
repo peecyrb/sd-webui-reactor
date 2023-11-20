@@ -2,11 +2,11 @@ import copy
 import os
 from dataclasses import dataclass
 from typing import List, Union
-
+from typing import Tuple
 import cv2
 import numpy as np
 from PIL import Image
-
+from insightface.app.common import Face as IFace
 import insightface
 
 from scripts.reactor_helpers import get_image_md5hash, get_Device
