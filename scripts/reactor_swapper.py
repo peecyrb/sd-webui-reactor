@@ -2,13 +2,16 @@ import copy
 import os
 from dataclasses import dataclass
 from typing import List, Union
-from typing import Tuple
+
 import cv2
 import numpy as np
-from PIL import Image
-from insightface.app.common import Face as IFace
+from numpy import uint8
+from PIL import Image, ImageDraw
+from scripts.inferencers.bisenet_mask_generator import BiSeNetMaskGenerator
+from scripts.entities.face import Face
+from scripts.entities.rect import Rect
 import insightface
-
+from torchvision.transforms.functional import to_pil_image
 from scripts.reactor_helpers import get_image_md5hash, get_Device
 from modules.face_restoration import FaceRestoration
 try: # A1111
@@ -18,6 +21,7 @@ except: # SD.Next
 from modules.upscaler import UpscalerData
 from modules.shared import state
 from scripts.reactor_logger import logger
+
 try:
     from modules.paths_internal import models_path
 except:
@@ -28,16 +32,6 @@ except:
 
 import warnings
 
-PILImage = Image.Image
-CV2ImgU8 = np.ndarray[int, np.dtype[uint8]]
-Face = IFace
-BoxCoords = Tuple[int, int, int, int]
-
-
-class Gender(Enum):
-    AUTO = -1
-    FEMALE = 0
-    MALE = 1
 np.warnings = warnings
 np.warnings.filterwarnings('ignore')
 
@@ -86,8 +80,9 @@ def check_process_halt(msgforced: bool = False):
 
 
 FS_MODEL = None
+MASK_MODEL = None
 CURRENT_FS_MODEL_PATH = None
-
+CURRENT_MASK_MODEL_PATH = None
 ANALYSIS_MODEL = None
 
 SOURCE_FACES = None
@@ -113,6 +108,8 @@ def getFaceSwapModel(model_path: str):
         FS_MODEL = insightface.model_zoo.get_model(model_path, providers=PROVIDERS)
 
     return FS_MODEL
+
+
 
 
 def restore_face(image: Image, enhancement_options: EnhancementOptions):
@@ -178,7 +175,28 @@ def enhance_image(image: Image, enhancement_options: EnhancementOptions):
         result_image = restore_face(result_image, enhancement_options)
 
     return result_image
+def enhance_image_and_mask(image: Image.Image, enhancement_options: EnhancementOptions,target_img_orig:Image.Image,entire_mask_image:Image.Image)->Image.Image:
+    result_image = image
+    
+    if check_process_halt(msgforced=True):
+        return result_image
+    
+    if enhancement_options.do_restore_first:
+        
+        result_image = restore_face(result_image, enhancement_options)
+        result_image = Image.composite(result_image,target_img_orig,entire_mask_image)
+        result_image = upscale_image(result_image, enhancement_options)
 
+    else:
+
+        result_image = upscale_image(result_image, enhancement_options)
+        entire_mask_image = Image.fromarray(cv2.resize(np.array(entire_mask_image),result_image.size, interpolation=cv2.INTER_AREA)).convert("L")
+        result_image = Image.composite(result_image,target_img_orig,entire_mask_image)
+        result_image = restore_face(result_image, enhancement_options)
+
+    return result_image
+
+    
 def get_gender(face, face_index):
     gender = [
         x.sex
@@ -292,6 +310,7 @@ def swap_face(
     source_hash_check: bool = True,
     target_hash_check: bool = False,
     device: str = "CPU",
+    mask_face:bool = False
 ):
     global SOURCE_FACES, SOURCE_IMAGE_HASH, TARGET_FACES, TARGET_IMAGE_HASH, PROVIDERS
     result_image = target_img
@@ -318,7 +337,8 @@ def swap_face(
 
         source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
         target_img = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
-
+        target_img_orig = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
+        entire_mask_image = np.zeros_like(np.array(target_img))
         output: List = []
         output_info: str = ""
         swapped = 0
@@ -421,7 +441,12 @@ def swap_face(
                         
                         if target_face is not None and wrong_gender == 0:
                             logger.status("Swapping Source into Target")
-                            result = face_swapper.get(result, target_face, source_face)
+                            swapped_image = face_swapper.get(result, target_face, source_face)
+                                                    
+                            if mask_face:
+                                result = apply_face_mask(swapped_image=swapped_image,target_image=result,target_face=target_face,entire_mask_image=entire_mask_image)
+                            else:
+                                result = swapped_image
                             swapped += 1
                         
                         elif wrong_gender == 1:
@@ -455,8 +480,13 @@ def swap_face(
                 result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
                 
                 if enhancement_options is not None and swapped > 0:
-                    result_image = enhance_image(result_image, enhancement_options)
-
+                    if mask_face and entire_mask_image is not None:
+                        enhance_image_and_mask(result_image, enhancement_options,Image.fromarray(target_img_orig),Image.fromarray(entire_mask_image).convert("L"))    
+                    else:    
+                        result_image = enhance_image(result_image, enhancement_options)
+                elif mask_face and entire_mask_image is not None and swapped > 0:
+                    result_image = Image.composite(result_image,Image.fromarray(target_img_orig),Image.fromarray(entire_mask_image).convert("L"))
+               
             else:
                 logger.status("No source face(s) in the provided Index")
         else:
@@ -465,99 +495,158 @@ def swap_face(
     return result_image, output, swapped
 
 
-def merge_images_with_mask(
-    image1: CV2ImgU8, image2: CV2ImgU8, mask: CV2ImgU8
-) -> CV2ImgU8:
+
+def apply_face_mask(swapped_image:np.ndarray,target_image:np.ndarray,target_face,entire_mask_image:np.array)->np.ndarray:
+    logger.status("Masking Face")
+    mask_generator =  BiSeNetMaskGenerator()
+    face = Face(target_image,Rect.from_ndarray(np.array(target_face.bbox)),1.6,512,"")
+    face_image = np.array(face.image)
+    process_face_image(face)
+    face_area_on_image = face.face_area_on_image
+    mask = mask_generator.generate_mask(face_image,face_area_on_image=face_area_on_image,affected_areas=["Face"],mask_size=0,use_minimal_area=True)
+    mask = cv2.blur(mask, (12, 12))
+    """entire_mask_image = np.zeros_like(target_image)"""
+    larger_mask = cv2.resize(mask, dsize=(face.width, face.height))
+    entire_mask_image[
+        face.top : face.bottom,
+        face.left : face.right,
+    ] = larger_mask
+   
+   
+    result = Image.composite(Image.fromarray(swapped_image),Image.fromarray(target_image), Image.fromarray(entire_mask_image).convert("L"))
+    return np.array(result)
+    
+
+def correct_face_tilt(angle: float) -> bool:
+        
+        angle = abs(angle)
+        if angle > 180:
+            angle = 360 - angle
+        return angle > 40
+def _dilate(arr: np.ndarray, value: int) -> np.ndarray:
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (value, value))
+    return cv2.dilate(arr, kernel, iterations=1)
+
+
+def _erode(arr: np.ndarray, value: int) -> np.ndarray:
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (value, value))
+    return cv2.erode(arr, kernel, iterations=1)
+colors = [
+    (255, 0, 0),
+    (0, 255, 0),
+    (0, 0, 255),
+    (255, 255, 0),
+    (255, 0, 255),
+    (0, 255, 255),
+    (255, 255, 255),
+    (128, 0, 0),
+    (0, 128, 0),
+    (128, 128, 0),
+    (0, 0, 128),
+    (0, 128, 128),
+]
+
+
+def color_generator(colors):
+    while True:
+        for color in colors:
+            yield color
+
+
+color_iter = color_generator(colors)
+def process_face_image(
+        face: Face,
+        **kwargs,
+    ) -> Image:
+        image = np.array(face.image)
+        overlay = image.copy()
+        cv2.rectangle(overlay, (0, 0), (image.shape[1], image.shape[0]), next(color_iter), -1)
+        l, t, r, b = face.face_area_on_image
+        cv2.rectangle(overlay, (l, t), (r, b), (0, 0, 0), 10)
+        if face.landmarks_on_image is not None:
+            for landmark in face.landmarks_on_image:
+                cv2.circle(overlay, (int(landmark.x), int(landmark.y)), 6, (0, 0, 0), 10)
+        alpha = 0.3
+        output = cv2.addWeighted(image, 1 - alpha, overlay, alpha, 0)
+        
+        return Image.fromarray(output)
+def dilate_erode(img: Image.Image, value: int) -> Image.Image:
     """
-    Merges two images using a given mask. The regions where the mask is set will be replaced with the corresponding
-    areas of the second image.
+    The dilate_erode function takes an image and a value.
+    If the value is positive, it dilates the image by that amount.
+    If the value is negative, it erodes the image by that amount.
 
-    Args:
-        image1 (CV2Img): The base image, which must have the same shape as image2.
-        image2 (CV2Img): The image to be merged, which must have the same shape as image1.
-        mask (CV2Img): A binary mask specifying the regions to be merged. The mask shape should match image1's first two dimensions.
+    Parameters
+    ----------
+        img: PIL.Image.Image
+            the image to be processed
+        value: int
+            kernel size of dilation or erosion
 
-    Returns:
-        CV2Img: The merged image.
-
-    Raises:
-        ValueError: If the shapes of the images and mask do not match.
+    Returns
+    -------
+        PIL.Image.Image
+            The image that has been dilated or eroded
     """
+    if value == 0:
+        return img
 
-    if image1.shape != image2.shape or image1.shape[:2] != mask.shape:
-        raise ValueError("Img should have the same shape")
-    mask = mask.astype(np.uint8)
-    masked_region = cv2.bitwise_and(image2, image2, mask=mask)
-    inverse_mask = cv2.bitwise_not(mask)
-    empty_region = cv2.bitwise_and(image1, image1, mask=inverse_mask)
-    merged_image = cv2.add(empty_region, masked_region)
-    return merged_image
+    arr = np.array(img)
+    arr = _dilate(arr, value) if value > 0 else _erode(arr, -value)
 
+    return Image.fromarray(arr)
 
-def erode_mask(mask: CV2ImgU8, kernel_size: int = 3, iterations: int = 1) -> CV2ImgU8:
+def mask_to_pil(masks, shape: tuple[int, int]) -> list[Image.Image]:
     """
-    Erodes a binary mask using a given kernel size and number of iterations.
+    Parameters
+    ----------
+    masks: torch.Tensor, dtype=torch.float32, shape=(N, H, W).
+        The device can be CUDA, but `to_pil_image` takes care of that.
 
-    Args:
-        mask (CV2Img): The binary mask to erode.
-        kernel_size (int, optional): The size of the kernel. Default is 3.
-        iterations (int, optional): The number of erosion iterations. Default is 1.
-
-    Returns:
-        CV2Img: The eroded mask.
+    shape: tuple[int, int]
+        (width, height) of the original image
     """
-    kernel = np.ones((kernel_size, kernel_size), np.uint8)
-    eroded_mask = cv2.erode(mask, kernel, iterations=iterations)
-    return eroded_mask
+    n = masks.shape[0]
+    return [to_pil_image(masks[i], mode="L").resize(shape) for i in range(n)]
 
-
-def apply_gaussian_blur(
-    mask: CV2ImgU8, kernel_size: Tuple[int, int] = (5, 5), sigma_x: int = 0
-) -> CV2ImgU8:
+def create_mask_from_bbox(
+    bboxes: list[list[float]], shape: tuple[int, int]
+) -> list[Image.Image]:
     """
-    Applies a Gaussian blur to a mask.
+    Parameters
+    ----------
+        bboxes: list[list[float]]
+            list of [x1, y1, x2, y2]
+            bounding boxes
+        shape: tuple[int, int]
+            shape of the image (width, height)
 
-    Args:
-        mask (CV2Img): The mask to blur.
-        kernel_size (tuple, optional): The size of the kernel, e.g. (5, 5). Default is (5, 5).
-        sigma_x (int, optional): The standard deviation in the X direction. Default is 0.
+    Returns
+    -------
+        masks: list[Image.Image]
+        A list of masks
 
-    Returns:
-        CV2Img: The blurred mask.
     """
-    blurred_mask = cv2.GaussianBlur(mask, kernel_size, sigma_x)
-    return blurred_mask
+    masks = []
+    for bbox in bboxes:
+        mask = Image.new("L", shape, 0)
+        mask_draw = ImageDraw.Draw(mask)
+        mask_draw.rectangle(bbox, fill=255)
+        masks.append(mask)
+    return masks
+
+def rotate_image(image: Image, angle: float) -> Image:
+    if angle == 0:
+        return image
+    return Image.fromarray(rotate_array(np.array(image), angle))
 
 
-def dilate_mask(mask: CV2ImgU8, kernel_size: int = 5, iterations: int = 1) -> CV2ImgU8:
-    """
-    Dilates a binary mask using a given kernel size and number of iterations.
+def rotate_array(image: np.ndarray, angle: float) -> np.ndarray:
+    if angle == 0:
+        return image
 
-    Args:
-        mask (CV2Img): The binary mask to dilate.
-        kernel_size (int, optional): The size of the kernel. Default is 5.
-        iterations (int, optional): The number of dilation iterations. Default is 1.
+    h, w = image.shape[:2]
+    center = (w // 2, h // 2)
 
-    Returns:
-        CV2Img: The dilated mask.
-    """
-    kernel = np.ones((kernel_size, kernel_size), np.uint8)
-    dilated_mask = cv2.dilate(mask, kernel, iterations=iterations)
-    return dilated_mask
-
-
-def get_face_mask(aimg: CV2ImgU8, bgr_fake: CV2ImgU8) -> CV2ImgU8:
-    """
-    Generates a face mask by performing bitwise OR on two face masks and then dilating the result.
-
-    Args:
-        aimg (CV2Img): Input image for generating the first face mask.
-        bgr_fake (CV2Img): Input image for generating the second face mask.
-
-    Returns:
-        CV2Img: The combined and dilated face mask.
-    """
-    mask1 = generate_face_mask(aimg, device=shared.device)
-    mask2 = generate_face_mask(bgr_fake, device=shared.device)
-    mask = dilate_mask(cv2.bitwise_or(mask1, mask2))
-    return mask
+    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+    return cv2.warpAffine(image, M, (w, h))
