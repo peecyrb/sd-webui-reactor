@@ -481,7 +481,7 @@ def swap_face(
                 
                 if enhancement_options is not None and swapped > 0:
                     if mask_face and entire_mask_image is not None:
-                        enhance_image_and_mask(result_image, enhancement_options,Image.fromarray(target_img_orig),Image.fromarray(entire_mask_image).convert("L"))    
+                        result_image = enhance_image_and_mask(result_image, enhancement_options,Image.fromarray(target_img_orig),Image.fromarray(entire_mask_image).convert("L"))    
                     else:    
                         result_image = enhance_image(result_image, enhancement_options)
                 elif mask_face and entire_mask_image is not None and swapped > 0:
