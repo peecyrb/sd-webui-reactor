@@ -66,8 +66,7 @@ class FaceSwapScript(scripts.Script):
                     img = gr.Image(type="pil")
                     enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
                     save_original = gr.Checkbox(False, label="Save Original", info="Save the original image(s) made before swapping; If you use \"img2img\" - this option will affect with \"Swap in generated\" only")
-                    mask_face = gr.Checkbox(False, label="Mask Faces", info="Attempt to mask only the faces and eliminate pixelation of the image around the contours.")
-
+                    mask_face = gr.Checkbox(False, label="Face Mask Correction", info="Apply this option if you see some pixelation around face contours")
                     gr.Markdown("<br>")
                     gr.Markdown("Source Image (above):")
                     with gr.Row():
@@ -213,7 +212,7 @@ class FaceSwapScript(scripts.Script):
             source_hash_check,
             target_hash_check,
             device,
-            mask_face
+            mask_face,
         ]
 
 
@@ -267,7 +266,7 @@ class FaceSwapScript(scripts.Script):
         source_hash_check,
         target_hash_check,
         device,
-        mask_face
+        mask_face,
     ):
         self.enable = enable
         if self.enable:
@@ -316,6 +315,8 @@ class FaceSwapScript(scripts.Script):
                 self.source_hash_check = True
             if self.target_hash_check is None:
                 self.target_hash_check = False
+            if self.mask_face is None:
+                self.mask_face = False
 
             set_Device(self.device)
             
@@ -339,7 +340,7 @@ class FaceSwapScript(scripts.Script):
                             source_hash_check=self.source_hash_check,
                             target_hash_check=self.target_hash_check,
                             device=self.device,
-                            mask_face=mask_face
+                            mask_face=self.mask_face,
                         )
                         p.init_images[i] = result
                         # result_path = get_image_path(p.init_images[i], p.outpath_samples, "", p.all_seeds[i], p.all_prompts[i], "txt", p=p, suffix="-swapped")
@@ -391,7 +392,7 @@ class FaceSwapScript(scripts.Script):
                                 source_hash_check=self.source_hash_check,
                                 target_hash_check=self.target_hash_check,
                                 device=self.device,
-                                mask_face=self.mask_face
+                                mask_face=self.mask_face,
                             )
                             if result is not None and swapped > 0:
                                 result_images.append(result)
@@ -449,7 +450,7 @@ class FaceSwapScript(scripts.Script):
                     source_hash_check=self.source_hash_check,
                     target_hash_check=self.target_hash_check,
                     device=self.device,
-                    mask_face=self.mask_face
+                    mask_face=self.mask_face,
                 )
                 try:
                     pp = scripts_postprocessing.PostprocessedImage(result)
@@ -476,8 +477,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                 with gr.Column():
                     img = gr.Image(type="pil")
                     enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
-                    mask_face = gr.Checkbox(False, label="Mask Faces", info="Attempt to mask only the faces and eliminate pixelation of the image around the contours.")
-                    
+                    mask_face = gr.Checkbox(False, label="Face Mask Correction", info="Apply this option if you see some pixelation around face contours")
                     gr.Markdown("Source Image (above):")
                     with gr.Row():
                         source_faces_index = gr.Textbox(
@@ -592,7 +592,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             'gender_target': gender_target,
             'codeformer_weight': codeformer_weight,
             'device': device,
-            'mask_face':mask_face
+            'mask_face': mask_face,
         }
         return args
 
@@ -657,6 +657,8 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                 self.source_faces_index = [0]
             if len(self.faces_index) == 0:
                 self.faces_index = [0]
+            if self.mask_face is None:
+                self.mask_face = False
 
             current_job_number = shared.state.job_no + 1
             job_count = shared.state.job_count
@@ -681,7 +683,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                     source_hash_check=True,
                     target_hash_check=True,
                     device=self.device,
-                    mask_face=self.mask_face
+                    mask_face=self.mask_face,
                 )
                 try:
                     pp.info["ReActor"] = True
