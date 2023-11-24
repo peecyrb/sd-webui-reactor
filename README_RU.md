@@ -21,7 +21,7 @@
 
 ---
   <b>
-    <a href="#installation">Установка</a> | <a href="#features">Возможности</a> | <a href="#usage">Использование</a> | <a href="#api">API</a> | <a href="#troubleshooting">Устранение проблем</a> | <a href="#updating">Обновление</a> | <a href="#comfyui">ComfyUI</a> | <a href="#disclaimer">Ответственность</a>
+    <a href="#latestupdate">Что нового</a> | <a href="#installation">Установка</a> | <a href="#features">Возможности</a> | <a href="#usage">Использование</a> | <a href="#api">API</a> | <a href="#troubleshooting">Устранение проблем</a> | <a href="#updating">Обновление</a> | <a href="#comfyui">ComfyUI</a> | <a href="#disclaimer">Ответственность</a>
   </b>
 </div>
 
@@ -54,6 +54,17 @@
 </table>
 
 <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/demo_crop.jpg?raw=true" alt="example"/>
+
+<a name="latestupdate">
+
+## Что нового в последнем обновлении
+
+### 0.5.1 <sub><sup>BETA2</sup></sub>
+
+- Теперь можно сохранять модели лиц в качестве файлов "safetensors" (находятся в `<sd-web-ui-folder>\models\reactor\faces`) и загружать их с ReActor, храня супер легкие модели лиц, которые вы чаще всего используете;
+- Новые опция "Face Mask Correction" - если вы сталкиваетесь с пикселизацией вокруг контуров лица, эта опция будет полезной;
+
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/face_model_demo_01.jpg?raw=true" alt="0.5.0-whatsnew-01" width="100%"/>
 
 <a name="installation">
 
@@ -106,6 +117,8 @@
 - Функция **сохранения оригинального изображения** (сгенерированного до замены лица)
 - **Восстановление лица** после замены
 - **Увеличение размера** полученного изображения
+- Сохранение и загрузка **Моделей Лиц типа Safetensors**
+- **Коррекция Маски Лица** для предотвращения какой-либо пикселизации вокруг контуров лиц
 - Возможность задать **порядок постобработки**
 - **100% совместимость** с разными **SD WebUI**: Automatic1111, SD.Next, Cagliostro Colab UI
 - **Отличная производительность** даже с использованием ЦПУ, ReActor для SD WebUI абсолютно не требователен к мощности вашей видеокарты

@@ -22,7 +22,7 @@
 
 ---
   <b>
-    <a href="#installation">Installation</a> | <a href="#features">Features</a> | <a href="#usage">Usage</a> | <a href="#api">API</a> | <a href="#troubleshooting">Troubleshooting</a> | <a href="#updating">Updating</a> | <a href="#comfyui">ComfyUI</a> | <a href="#disclaimer">Disclaimer</a>
+    <a href="#latestupdate">What's new</a> | <a href="#installation">Installation</a> | <a href="#features">Features</a> | <a href="#usage">Usage</a> | <a href="#api">API</a> | <a href="#troubleshooting">Troubleshooting</a> | <a href="#updating">Updating</a> | <a href="#comfyui">ComfyUI</a> | <a href="#disclaimer">Disclaimer</a>
   </b>
 </div>
 
@@ -55,6 +55,17 @@
 </table>
 
 <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/demo_crop.jpg?raw=true" alt="example"/>
+
+<a name="latestupdate">
+
+## What's new in the latest update
+
+### 0.5.1 <sub><sup>BETA2</sup></sub>
+
+- You can now save face models as "safetensors" files (stored in `<sd-web-ui-folder>\models\reactor\faces`) and load them into ReActor, keeping super lightweight face models of the faces you use;
+- "Face Mask Correction" option - if you encounter some pixelation around face contours, this option will be useful;
+
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/face_model_demo_01.jpg?raw=true" alt="0.5.0-whatsnew-01" width="100%"/>
 
 ## Installation
 
@@ -103,6 +114,8 @@
 - Ability to **save original images** (made before swapping)
 - **Face restoration** of a swapped face
 - **Upscaling** of a resulting image
+- Saving ans loading **Safetensors Face Models**
+- **Facial Mask Correction** to avoid any  pixelation around face contours
 - Ability to set the **Postprocessing order**
 - **100% compatibility** with different **SD WebUIs**: Automatic1111, SD.Next, Cagliostro Colab UI
 - **Fast performance** even with CPU, ReActor for SD WebUI is absolutely not picky about how powerful your GPU is
