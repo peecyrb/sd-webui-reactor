@@ -19,5 +19,8 @@ curl -X POST \
     "gender_target": 0,
     "save_to_file": 1,
     "result_file_path": "",
-    "device": "CUDA"
+    "device": "CUDA",
+    "mask_face": 1,
+    "select_source": 1,
+    "face_model": "elena.safetensors"
     }'

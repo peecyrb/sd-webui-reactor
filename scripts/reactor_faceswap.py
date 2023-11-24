@@ -28,10 +28,16 @@ except:
         model_path = os.path.abspath("models")
 
 from scripts.reactor_logger import logger
-from scripts.reactor_swapper import EnhancementOptions, swap_face, check_process_halt, reset_messaged
+from scripts.reactor_swapper import (
+    EnhancementOptions, 
+    swap_face, 
+    check_process_halt, 
+    reset_messaged, 
+    build_face_model
+)
 from scripts.reactor_version import version_flag, app_title
 from scripts.console_log_patch import apply_logging_patch
-from scripts.reactor_helpers import make_grid, get_image_path, set_Device
+from scripts.reactor_helpers import make_grid, get_image_path, set_Device, get_model_names, get_facemodels
 from scripts.reactor_globals import DEVICE, DEVICE_LIST
 
 
@@ -61,12 +67,69 @@ class FaceSwapScript(scripts.Script):
 
     def ui(self, is_img2img):
         with gr.Accordion(f"{app_title}", open=False):
+
+            def update_fm_list(selected: str):
+                return gr.Dropdown.update(
+                    value=selected, choices=get_model_names(get_facemodels)
+                )
+            def update_upscalers_list(selected: str):
+                return gr.Dropdown.update(
+                    value=selected, choices=[upscaler.name for upscaler in shared.sd_upscalers]
+                )
+            def update_models_list(selected: str):
+                return gr.Dropdown.update(
+                    value=selected, choices=get_models()
+                )
+            
+            # TAB MAIN
             with gr.Tab("Main"):
                 with gr.Column():
-                    img = gr.Image(type="pil")
+                    img = gr.Image(
+                        type="pil",
+                        label="Source Image",
+                    )
+                    # face_model = gr.File(
+                    #     file_types=[".safetensors"],
+                    #     label="Face Model",
+                    #     show_label=True,
+                    # )
                     enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
-                    save_original = gr.Checkbox(False, label="Save Original", info="Save the original image(s) made before swapping; If you use \"img2img\" - this option will affect with \"Swap in generated\" only")
-                    mask_face = gr.Checkbox(False, label="Face Mask Correction", info="Apply this option if you see some pixelation around face contours")
+                    gr.Markdown("<br>")
+                    with gr.Row():
+                        select_source = gr.Radio(
+                            ["Image","Face Model"],
+                            value="Image",
+                            label="Select Source",
+                            type="index",
+                            scale=1,
+                        )
+                        face_models = get_model_names(get_facemodels)
+                        face_model = gr.Dropdown(
+                            choices=face_models,
+                            label="Choose Face Model",
+                            value="None",
+                            scale=2,
+                        )
+                        fm_update = gr.Button(
+                            value="🔄",
+                            variant="tool",
+                        )
+                        fm_update.click(
+                            update_fm_list, 
+                            inputs=[face_model],
+                            outputs=[face_model],
+                        )
+                    setattr(face_model, "do_not_save_to_config", True)
+                    save_original = gr.Checkbox(
+                        False,
+                        label="Save Original", 
+                        info="Save the original image(s) made before swapping; If you use \"img2img\" - this option will affect with \"Swap in generated\" only"
+                    )
+                    mask_face = gr.Checkbox(
+                        False,
+                        label="Face Mask Correction", 
+                        info="Apply this option if you see some pixelation around face contours"
+                    )
                     gr.Markdown("<br>")
                     gr.Markdown("Source Image (above):")
                     with gr.Row():
@@ -120,18 +183,30 @@ class FaceSwapScript(scripts.Script):
                         True,
                         label="Swap in generated image",
                         visible=is_img2img,
-                    )                    
+                    )
+            
+            # TAB UPSCALE
             with gr.Tab("Upscale"):
                 restore_first = gr.Checkbox(
                     True,
                     label="1. Restore Face -> 2. Upscale (-Uncheck- if you want vice versa)",
                     info="Postprocessing Order"
                 )
-                upscaler_name = gr.Dropdown(
-                    choices=[upscaler.name for upscaler in shared.sd_upscalers],
-                    label="Upscaler",
-                    value="None",
-                    info="Won't scale if you choose -Swap in Source- via img2img, only 1x-postprocessing will affect (texturing, denoising, restyling etc.)"
+                with gr.Row():
+                    upscaler_name = gr.Dropdown(
+                        choices=[upscaler.name for upscaler in shared.sd_upscalers],
+                        label="Upscaler",
+                        value="None",
+                        info="Won't scale if you choose -Swap in Source- via img2img, only 1x-postprocessing will affect (texturing, denoising, restyling etc.)"
+                    )
+                    upscalers_update = gr.Button(
+                        value="🔄",
+                        variant="tool",
+                    )
+                upscalers_update.click(
+                    update_upscalers_list, 
+                    inputs=[upscaler_name],
+                    outputs=[upscaler_name],
                 )
                 gr.Markdown("<br>")
                 with gr.Row():
@@ -139,6 +214,30 @@ class FaceSwapScript(scripts.Script):
                     upscaler_visibility = gr.Slider(
                         0, 1, 1, step=0.1, label="Upscaler Visibility (if scale = 1)"
                     )
+            
+            # TAB TOOLS
+            with gr.Tab("Tools 🆕"):
+                with gr.Tab("Face Models"):
+                    gr.Markdown("Load an image containing one person, name it and click 'Build and Save'")
+                    img_fm = gr.Image(
+                        type="pil",
+                        label="Load Image to build Face Model",
+                    )
+                    with gr.Row(equal_height=True):
+                        fm_name = gr.Textbox(
+                            value="",
+                            placeholder="Please type any name (e.g. Elena)",
+                            label="Face Model Name",
+                        )
+                        save_fm_btn = gr.Button("Build and Save")
+                    save_fm = gr.Markdown("You can find saved models in 'models/reactor/faces'")
+                    save_fm_btn.click(
+                        build_face_model,
+                        inputs=[img_fm, fm_name],
+                        outputs=[save_fm],
+                    )
+            
+            # TAB SETTINGS
             with gr.Tab("Settings"):
                 models = get_models()
                 with gr.Row(visible=EP_is_visible):
@@ -161,21 +260,30 @@ class FaceSwapScript(scripts.Script):
                 with gr.Row():
                     if len(models) == 0:
                         logger.warning(
-                            "You should at least have one model in models directory, please read the doc here : https://github.com/Gourieff/sd-webui-reactor/"
+                            "You should at least have one model in models directory, please read the doc here: https://github.com/Gourieff/sd-webui-reactor/"
                         )
                         model = gr.Dropdown(
                             choices=models,
-                            label="Model not found, please download one and reload WebUI",
+                            label="Model not found, please download one and refresh the list"
                         )
                     else:
                         model = gr.Dropdown(
                             choices=models, label="Model", value=models[0]
                         )
+                    models_update = gr.Button(
+                        value="🔄",
+                        variant="tool",
+                    )
+                    models_update.click(
+                        update_models_list, 
+                        inputs=[model],
+                        outputs=[model],
+                    )
                     console_logging_level = gr.Radio(
                         ["No log", "Minimum", "Default"],
                         value="Minimum",
                         label="Console Log Level",
-                        type="index",
+                        type="index"
                     )
                 gr.Markdown("<br>")
                 with gr.Row():
@@ -189,6 +297,8 @@ class FaceSwapScript(scripts.Script):
                         label="Target Image Hash Check",
                         info="Affects if you use Extras tab or img2img with only 'Swap in source image' on."
                     )
+            
+            gr.Markdown("<span style='display:block;text-align:right;padding:3px;font-size:0.666em'>by Eugene Gourieff</span>")
 
         return [
             img,
@@ -213,6 +323,8 @@ class FaceSwapScript(scripts.Script):
             target_hash_check,
             device,
             mask_face,
+            select_source,
+            face_model,
         ]
 
 
@@ -267,9 +379,13 @@ class FaceSwapScript(scripts.Script):
         target_hash_check,
         device,
         mask_face,
+        select_source,
+        face_model,
     ):
         self.enable = enable
         if self.enable:
+
+            logger.debug("*** Start process")
 
             reset_messaged()
             if check_process_halt():
@@ -295,6 +411,8 @@ class FaceSwapScript(scripts.Script):
             self.target_hash_check = target_hash_check
             self.device = device
             self.mask_face = mask_face
+            self.select_source = select_source
+            self.face_model = face_model
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -318,9 +436,11 @@ class FaceSwapScript(scripts.Script):
             if self.mask_face is None:
                 self.mask_face = False
 
+            logger.debug("*** Set Device")
             set_Device(self.device)
             
-            if self.source is not None:
+            if (self.source is not None and self.select_source == 0) or ((self.face_model is not None and self.face_model != "None") and self.select_source == 1):
+                logger.debug("*** Log patch")
                 apply_logging_patch(console_logging_level)
                 if isinstance(p, StableDiffusionProcessingImg2Img) and self.swap_in_source:
                     logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
@@ -341,6 +461,8 @@ class FaceSwapScript(scripts.Script):
                             target_hash_check=self.target_hash_check,
                             device=self.device,
                             mask_face=self.mask_face,
+                            select_source=self.select_source,
+                            face_model = self.face_model,
                         )
                         p.init_images[i] = result
                         # result_path = get_image_path(p.init_images[i], p.outpath_samples, "", p.all_seeds[i], p.all_prompts[i], "txt", p=p, suffix="-swapped")
@@ -353,9 +475,12 @@ class FaceSwapScript(scripts.Script):
             
             else:
                 logger.error("Please provide a source face")
+                return
 
     def postprocess(self, p: StableDiffusionProcessing, processed: Processed, *args):
         if self.enable:
+
+            logger.debug("*** Check postprocess")
 
             reset_messaged()
             if check_process_halt():
@@ -373,42 +498,44 @@ class FaceSwapScript(scripts.Script):
 
                 if self.swap_in_generated:
                     logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
-                    if self.source is not None:
-                        for i,(img,info) in enumerate(zip(orig_images, orig_infotexts)):
-                            if check_process_halt():
-                                postprocess_run = False
-                                break
-                            if len(orig_images) > 1:
-                                logger.status("Swap in %s", i)
-                            result, output, swapped = swap_face(
-                                self.source,
-                                img,
-                                source_faces_index=self.source_faces_index,
-                                faces_index=self.faces_index,
-                                model=self.model,
-                                enhancement_options=self.enhancement_options,
-                                gender_source=self.gender_source,
-                                gender_target=self.gender_target,
-                                source_hash_check=self.source_hash_check,
-                                target_hash_check=self.target_hash_check,
-                                device=self.device,
-                                mask_face=self.mask_face,
-                            )
-                            if result is not None and swapped > 0:
-                                result_images.append(result)
-                                suffix = "-swapped"
-                                try:
-                                    img_path = save_image(result, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "png",info=info, p=p, suffix=suffix)
-                                except:
-                                    logger.error("Cannot save a result image - please, check SD WebUI Settings (Saving and Paths)")
-                            elif result is None:
-                                logger.error("Cannot create a result image")
-                            
-                            # if len(output) != 0:
-                            #     split_fullfn = os.path.splitext(img_path[0])
-                            #     fullfn = split_fullfn[0] + ".txt"
-                            #     with open(fullfn, 'w', encoding="utf8") as f:
-                            #         f.writelines(output)
+                    # if self.source is not None:
+                    for i,(img,info) in enumerate(zip(orig_images, orig_infotexts)):
+                        if check_process_halt():
+                            postprocess_run = False
+                            break
+                        if len(orig_images) > 1:
+                            logger.status("Swap in %s", i)
+                        result, output, swapped = swap_face(
+                            self.source,
+                            img,
+                            source_faces_index=self.source_faces_index,
+                            faces_index=self.faces_index,
+                            model=self.model,
+                            enhancement_options=self.enhancement_options,
+                            gender_source=self.gender_source,
+                            gender_target=self.gender_target,
+                            source_hash_check=self.source_hash_check,
+                            target_hash_check=self.target_hash_check,
+                            device=self.device,
+                            mask_face=self.mask_face,
+                            select_source=self.select_source,
+                            face_model = self.face_model,
+                        )
+                        if result is not None and swapped > 0:
+                            result_images.append(result)
+                            suffix = "-swapped"
+                            try:
+                                img_path = save_image(result, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "png",info=info, p=p, suffix=suffix)
+                            except:
+                                logger.error("Cannot save a result image - please, check SD WebUI Settings (Saving and Paths)")
+                        elif result is None:
+                            logger.error("Cannot create a result image")
+                        
+                        # if len(output) != 0:
+                        #     split_fullfn = os.path.splitext(img_path[0])
+                        #     fullfn = split_fullfn[0] + ".txt"
+                        #     with open(fullfn, 'w', encoding="utf8") as f:
+                        #         f.writelines(output)
                 
                 if shared.opts.return_grid and len(result_images) > 2 and postprocess_run:
                     grid = make_grid(result_images)
@@ -423,10 +550,13 @@ class FaceSwapScript(scripts.Script):
     
     def postprocess_batch(self, p, *args, **kwargs):
         if self.enable and not self.save_original:
+            logger.debug("*** Check postprocess_batch")
             images = kwargs["images"]
 
     def postprocess_image(self, p, script_pp: scripts.PostprocessImageArgs, *args):
         if self.enable and self.swap_in_generated and not self.save_original:
+
+            logger.debug("*** Check postprocess_image")
 
             current_job_number = shared.state.job_no + 1
             job_count = shared.state.job_count
@@ -435,36 +565,38 @@ class FaceSwapScript(scripts.Script):
             if check_process_halt():
                 return
             
-            if self.source is not None:
-                logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
-                image: Image.Image = script_pp.image
-                result, output, swapped = swap_face(
-                    self.source,
-                    image,
-                    source_faces_index=self.source_faces_index,
-                    faces_index=self.faces_index,
-                    model=self.model,
-                    enhancement_options=self.enhancement_options,
-                    gender_source=self.gender_source,
-                    gender_target=self.gender_target,
-                    source_hash_check=self.source_hash_check,
-                    target_hash_check=self.target_hash_check,
-                    device=self.device,
-                    mask_face=self.mask_face,
-                )
-                try:
-                    pp = scripts_postprocessing.PostprocessedImage(result)
-                    pp.info = {}
-                    p.extra_generation_params.update(pp.info)
-                    script_pp.image = pp.image
+            # if (self.source is not None and self.select_source == 0) or ((self.face_model is not None and self.face_model != "None") and self.select_source == 1):
+            logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
+            image: Image.Image = script_pp.image
+            result, output, swapped = swap_face(
+                self.source,
+                image,
+                source_faces_index=self.source_faces_index,
+                faces_index=self.faces_index,
+                model=self.model,
+                enhancement_options=self.enhancement_options,
+                gender_source=self.gender_source,
+                gender_target=self.gender_target,
+                source_hash_check=self.source_hash_check,
+                target_hash_check=self.target_hash_check,
+                device=self.device,
+                mask_face=self.mask_face,
+                select_source=self.select_source,
+                face_model = self.face_model,
+            )
+            try:
+                pp = scripts_postprocessing.PostprocessedImage(result)
+                pp.info = {}
+                p.extra_generation_params.update(pp.info)
+                script_pp.image = pp.image
 
-                    # if len(output) != 0:
-                    #     result_path = get_image_path(script_pp.image, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "txt", p=p, suffix="-swapped")
-                    #     if len(output) != 0:
-                    #         with open(result_path, 'w', encoding="utf8") as f:
-                    #             f.writelines(output)
-                except:
-                    logger.error("Cannot create a result image")
+                # if len(output) != 0:
+                #     result_path = get_image_path(script_pp.image, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "txt", p=p, suffix="-swapped")
+                #     if len(output) != 0:
+                #         with open(result_path, 'w', encoding="utf8") as f:
+                #             f.writelines(output)
+            except:
+                logger.error("Cannot create a result image")
 
 
 class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
@@ -473,11 +605,56 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
 
     def ui(self):
         with gr.Accordion(f"{app_title}", open=False):
+
+            def update_fm_list(selected: str):
+                return gr.Dropdown.update(
+                    value=selected, choices=get_model_names(get_facemodels)
+                )
+            def update_upscalers_list(selected: str):
+                return gr.Dropdown.update(
+                    value=selected, choices=[upscaler.name for upscaler in shared.sd_upscalers]
+                )
+            def update_models_list(selected: str):
+                return gr.Dropdown.update(
+                    value=selected, choices=get_models()
+                )
+            
+            # TAB MAIN
             with gr.Tab("Main"):
                 with gr.Column():
                     img = gr.Image(type="pil")
                     enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
-                    mask_face = gr.Checkbox(False, label="Face Mask Correction", info="Apply this option if you see some pixelation around face contours")
+                    # gr.Markdown("<br>")
+                    with gr.Row():
+                        select_source = gr.Radio(
+                            ["Image","Face Model"],
+                            value="Image",
+                            label="Select Source",
+                            type="index",
+                            scale=1,
+                        )
+                        face_models = get_model_names(get_facemodels)
+                        face_model = gr.Dropdown(
+                            choices=face_models,
+                            label="Choose Face Model",
+                            value="None",
+                            scale=2,
+                        )
+                        fm_update = gr.Button(
+                            value="🔄",
+                            variant="tool",
+                        )
+                        fm_update.click(
+                            update_fm_list, 
+                            inputs=[face_model],
+                            outputs=[face_model],
+                        )
+                    setattr(face_model, "do_not_save_to_config", True)
+                    mask_face = gr.Checkbox(
+                        False, 
+                        label="Face Mask Correction", 
+                        info="Apply this option if you see some pixelation around face contours"
+                    )
                     gr.Markdown("Source Image (above):")
                     with gr.Row():
                         source_faces_index = gr.Textbox(
@@ -519,23 +696,58 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                                 0, 1, 0.5, step=0.1, label="CodeFormer Weight", info="0 = maximum effect, 1 = minimum effect"
                             )
 
+            # TAB UPSCALE
             with gr.Tab("Upscale"):
                 restore_first = gr.Checkbox(
                     True,
                     label="1. Restore Face -> 2. Upscale (-Uncheck- if you want vice versa)",
                     info="Postprocessing Order"
                 )
-                upscaler_name = gr.Dropdown(
-                    choices=[upscaler.name for upscaler in shared.sd_upscalers],
-                    label="Upscaler",
-                    value="None",
-                    info="Won't scale if you choose -Swap in Source- via img2img, only 1x-postprocessing will affect (texturing, denoising, restyling etc.)"
+                with gr.Row():
+                    upscaler_name = gr.Dropdown(
+                        choices=[upscaler.name for upscaler in shared.sd_upscalers],
+                        label="Upscaler",
+                        value="None",
+                        info="Won't scale if you choose -Swap in Source- via img2img, only 1x-postprocessing will affect (texturing, denoising, restyling etc.)"
+                    )
+                    upscalers_update = gr.Button(
+                        value="🔄",
+                        variant="tool",
+                    )
+                upscalers_update.click(
+                    update_upscalers_list, 
+                    inputs=[upscaler_name],
+                    outputs=[upscaler_name],
                 )
                 with gr.Row():
                     upscaler_scale = gr.Slider(1, 8, 1, step=0.1, label="Scale by")
                     upscaler_visibility = gr.Slider(
                         0, 1, 1, step=0.1, label="Upscaler Visibility (if scale = 1)"
                     )
+            
+            # TAB TOOLS
+            with gr.Tab("Tools 🆕"):
+                with gr.Tab("Face Models"):
+                    gr.Markdown("Load an image containing one person, name it and click 'Build and Save'")
+                    img_fm = gr.Image(
+                        type="pil",
+                        label="Load Image to build Face Model",
+                    )
+                    with gr.Row(equal_height=True):
+                        fm_name = gr.Textbox(
+                            value="",
+                            placeholder="Please type any name (e.g. Elena)",
+                            label="Face Model Name",
+                        )
+                        save_fm_btn = gr.Button("Build and Save")
+                    save_fm = gr.Markdown("You can find saved models in 'models/reactor/faces'")
+                    save_fm_btn.click(
+                        build_face_model,
+                        inputs=[img_fm, fm_name],
+                        outputs=[save_fm],
+                    )
+            
+            # TAB SETTINGS
             with gr.Tab("Settings"):
                 models = get_models()
                 with gr.Row(visible=EP_is_visible):
@@ -558,22 +770,33 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                 with gr.Row():
                     if len(models) == 0:
                         logger.warning(
-                            "You should at least have one model in models directory, please read the doc here : https://github.com/Gourieff/sd-webui-reactor/"
+                            "You should at least have one model in models directory, please read the doc here: https://github.com/Gourieff/sd-webui-reactor/"
                         )
                         model = gr.Dropdown(
                             choices=models,
-                            label="Model not found, please download one and reload WebUI",
+                            label="Model not found, please download one and refresh the list",
                         )
                     else:
                         model = gr.Dropdown(
                             choices=models, label="Model", value=models[0]
                         )
+                    models_update = gr.Button(
+                        value="🔄",
+                        variant="tool",
+                    )
+                    models_update.click(
+                        update_models_list, 
+                        inputs=[model],
+                        outputs=[model],
+                    )
                     console_logging_level = gr.Radio(
                         ["No log", "Minimum", "Default"],
                         value="Minimum",
                         label="Console Log Level",
                         type="index",
                     )
+            
+            gr.Markdown("<span style='display:block;text-align:right;padding-right:3px;font-size:0.666em;margin: -9px 0'>by Eugene Gourieff</span>")
 
         args = {
             'img': img,
@@ -593,6 +816,8 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             'codeformer_weight': codeformer_weight,
             'device': device,
             'mask_face': mask_face,
+            'select_source': select_source,
+            'face_model': face_model,
         }
         return args
 
@@ -643,6 +868,8 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             self.codeformer_weight = args['codeformer_weight']
             self.device = args['device']
             self.mask_face = args['mask_face']
+            self.select_source = args['select_source']
+            self.face_model = args['face_model']
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -667,7 +894,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
 
             set_Device(self.device)
             
-            if self.source is not None:
+            if (self.source is not None and self.select_source == 0) or ((self.face_model is not None and self.face_model != "None") and self.select_source == 1):
                 apply_logging_patch(self.console_logging_level)
                 logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
                 image: Image.Image = pp.image
@@ -684,6 +911,8 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                     target_hash_check=True,
                     device=self.device,
                     mask_face=self.mask_face,
+                    select_source=self.select_source,
+                    face_model=self.face_model,
                 )
                 try:
                     pp.info["ReActor"] = True

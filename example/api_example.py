@@ -43,6 +43,9 @@ args=[
     False, #18 Source Image Hash Check, True - by default
     False, #19 Target Image Hash Check, False - by default
     "CUDA", #20 CPU or CUDA (if you have it), CPU - by default
+    True, #21 Face Mask Correction
+    1, #22 Select Source, 0 - Image, 1 - Face Model
+    "elena.safetensors", #23 Filename of the face model (from "models/reactor/faces"), e.g. elena.safetensors
 ]
 
 # The args for ReActor can be found by 

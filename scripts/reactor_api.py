@@ -71,7 +71,10 @@ def reactor_api(_: gr.Blocks, app: FastAPI):
         gender_target: int = Body(0,title="Gender Detection (Target) (0 - No, 1 - Female Only, 2 - Male Only)"),
         save_to_file: int = Body(0,title="Save Result to file, 0 - No, 1 - Yes"),
         result_file_path: str = Body("",title="(if 'save_to_file = 1') Result file path"),
-        device: str = Body("CPU",title="CPU or CUDA (if you have it)")
+        device: str = Body("CPU",title="CPU or CUDA (if you have it)"),
+        mask_face: int = Body(0,title="Face Mask Correction, 1 - True, 0 - False"),
+        select_source: int = Body(0,title="Select Source, 0 - Image, 1 - Face Model"),
+        face_model: str = Body("None",title="Filename of the face model (from 'models/reactor/faces'), e.g. elena.safetensors")
     ):
         s_image = api.decode_base64_to_image(source_image)
         t_image = api.decode_base64_to_image(target_image)
@@ -80,11 +83,12 @@ def reactor_api(_: gr.Blocks, app: FastAPI):
         gender_s = gender_source
         gender_t = gender_target
         restore_first_bool = True if restore_first == 1 else False
+        mask_face = True if mask_face == 1 else False
         up_options = EnhancementOptions(do_restore_first=restore_first_bool, scale=scale, upscaler=get_upscaler(upscaler), upscale_visibility=upscale_visibility,face_restorer=get_face_restorer(face_restorer),restorer_visibility=restorer_visibility,codeformer_weight=codeformer_weight)
         use_model = get_full_model(model)
         if use_model is None:
             Exception("Model not found")
-        result = swap_face(s_image, t_image, use_model, sf_index, f_index, up_options, gender_s, gender_t, True, True, device)
+        result = swap_face(s_image, t_image, use_model, sf_index, f_index, up_options, gender_s, gender_t, True, True, device, mask_face, select_source, face_model)
         if save_to_file == 1:
             if result_file_path == "":
                 result_file_path = default_file_path()
