@@ -7,7 +7,7 @@ import torch
 from facexlib.parsing import init_parsing_model
 from facexlib.utils.misc import img2tensor
 from torchvision.transforms.functional import normalize
-from scripts.inferencers.mask_generator import MaskGenerator
+from scripts.reactor_inferencers.mask_generator import MaskGenerator
 
 class BiSeNetMaskGenerator(MaskGenerator):
     def __init__(self) -> None:

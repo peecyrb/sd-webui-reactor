@@ -5,9 +5,9 @@ from PIL import Image, ImageDraw
 from torchvision.transforms.functional import to_pil_image
 
 from scripts.reactor_logger import logger
-from scripts.inferencers.bisenet_mask_generator import BiSeNetMaskGenerator
-from scripts.entities.face import FaceArea
-from scripts.entities.rect import Rect
+from scripts.reactor_inferencers.bisenet_mask_generator import BiSeNetMaskGenerator
+from scripts.reactor_entities.face import FaceArea
+from scripts.reactor_entities.rect import Rect
 
 
 colors = [

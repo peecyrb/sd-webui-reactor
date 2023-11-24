@@ -6,7 +6,7 @@ from modules import images
 from PIL import Image
 
 
-from scripts.entities.rect import Point, Rect
+from scripts.reactor_entities.rect import Point, Rect
 
 
 class FaceArea:
