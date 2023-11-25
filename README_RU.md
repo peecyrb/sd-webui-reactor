@@ -2,7 +2,7 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_red.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.5.1_beta3-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/версия-0.5.1_beta4-green?style=for-the-badge&labelColor=darkgreen)
   
   <a href='https://ko-fi.com/gourieff' target='_blank'><img height='33' src='https://storage.ko-fi.com/cdn/kofi3.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
   

@@ -533,10 +533,10 @@ def build_face_model(image: Image.Image, name: str):
     apply_logging_patch(1)
     image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     logger.status("Building Face Model...")
-    face_model = analyze_faces(image)[0]
-    if face_model is not None:
+    face_model = analyze_faces(image)
+    if face_model is not None and len(face_model) > 0:
         face_model_path = os.path.join(FACE_MODELS_PATH, name + ".safetensors")
-        save_face_model(face_model,face_model_path)
+        save_face_model(face_model[0],face_model_path)
         logger.status("--Done!--")
         done_msg = f"Face model has been saved to '{face_model_path}'"
         logger.status(done_msg)
