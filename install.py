@@ -79,12 +79,14 @@ print("ReActor preheating...", end=' ')
 
 last_device = None
 first_run = False
+available_devices = ["CPU", "CUDA"]
 
 try:
     last_device_log = os.path.join(BASE_PATH, "last_device.txt")
     with open(last_device_log) as f:
-        for el in f:
-            last_device = el.strip()
+        last_device = f.readline().strip()
+    if last_device not in available_devices:
+        last_device = None
 except:
     last_device = "CPU"
     first_run = True
@@ -97,7 +99,7 @@ with open(req_file) as file:
     import torch
     try:
         if torch.cuda.is_available():
-            if first_run:
+            if first_run or last_device is None:
                 last_device = "CUDA"
         elif torch.backends.mps.is_available() or hasattr(torch,'dml'):
             ort = "onnxruntime"
@@ -105,10 +107,10 @@ with open(req_file) as file:
             if first_run:
                 pip_uninstall("onnxruntime", "onnxruntime-gpu")
             # just in case:
-            if last_device == "CUDA":
+            if last_device == "CUDA" or last_device is None:
                 last_device = "CPU"
         else:
-            if last_device == "CUDA":
+            if last_device == "CUDA" or last_device is None:
                 last_device = "CPU"
         with open(os.path.join(BASE_PATH, "last_device.txt"), "w") as txt:
             txt.write(last_device)

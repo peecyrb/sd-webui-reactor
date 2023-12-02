@@ -26,10 +26,14 @@ def updateDevice():
     try:
         LAST_DEVICE_PATH = os.path.join(BASE_PATH, "last_device.txt")
         with open(LAST_DEVICE_PATH) as f:
-            for el in f:
-                device = el.strip()
-    except:
-        device = "CPU"
+            device = f.readline().strip()
+        if device not in DEVICE_LIST:
+            print(f"Error: Device {device} is not in DEVICE_LIST")
+            device = DEVICE_LIST[0]
+            print(f"Execution Provider has been set to {device}")
+    except Exception as e:
+        device = DEVICE_LIST[0]
+        print(f"Error: {e}\nExecution Provider has been set to {device}")
     return device
 
 DEVICE = updateDevice()
