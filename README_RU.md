@@ -2,9 +2,15 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_red.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.5.1_beta4-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/версия-0.5.1-brightgreen?style=for-the-badge&labelColor=darkgreen)
   
-  <a href='https://ko-fi.com/gourieff' target='_blank'><img height='33' src='https://storage.ko-fi.com/cdn/kofi3.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+  <a href="https://boosty.to/artgourieff" target="_blank">
+    <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Поддержать проект на Boosty"/>
+    <br>
+    <sup>
+      Поддержать проект
+    </sup>
+  </a>
   
   <hr>
   
@@ -27,39 +33,13 @@
 
 ---
 
-<table>
-  <tr>
-    <td width="134px">
-      <a href="https://boosty.to/artgourieff" target="_blank">
-        <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Поддержать проект на Boosty"/>
-        <br>
-        <sup>
-          Поддержать проект
-        </sup>
-      </a>
-    </td>
-    <td>
-      ReActor это расширение для Stable Diffusion WebUI, которое позволяет делать простую и точную замену лиц на изображениях. Сделано на основе <a href="https://github.com/Gourieff/ReActor-UI" target="_blank">ReActor-UI</a>.
-    </td>
-    <td width="144px">
-      <a href="https://paypal.me/artgourieff" target="_blank">
-        <img src="https://www.paypalobjects.com/digitalassets/c/website/logo/full-text/pp_fc_hl.svg" width="108" alt="Поддержать проект через PayPal"/>
-        <br>
-        <sup>
-          Помочь проекту
-        </sup>
-      </a>
-    </td>
-  </tr>
-</table>
-
 <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/demo_crop.jpg?raw=true" alt="example"/>
 
 <a name="latestupdate">
 
 ## Что нового в последнем обновлении
 
-### 0.5.1 <sub><sup>BETA2</sup></sub>
+### 0.5.1
 
 - Теперь можно сохранять модели лиц в качестве файлов "safetensors" (находятся в `<sd-web-ui-folder>\models\reactor\faces`) и загружать их с ReActor, храня супер легкие модели лиц, которые вы чаще всего используете;
 - Новые опция "Face Mask Correction" - если вы сталкиваетесь с пикселизацией вокруг контуров лица, эта опция будет полезной;

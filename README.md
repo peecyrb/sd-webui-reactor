@@ -2,10 +2,16 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_red.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/version-0.5.1_beta4-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/version-0.5.1-brightgreen?style=for-the-badge&labelColor=darkgreen)
   
-  <a href='https://ko-fi.com/gourieff' target='_blank'><img height='33' src='https://storage.ko-fi.com/cdn/kofi3.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
-  
+  <a href="https://boosty.to/artgourieff" target="_blank">
+    <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Support Me on Boosty"/>
+    <br>
+    <sup>
+      Support This Project
+    </sup>
+  </a>
+
   <hr>
   
   [![Commit activity](https://img.shields.io/github/commit-activity/t/Gourieff/sd-webui-reactor/main?cacheSeconds=0)](https://github.com/Gourieff/sd-webui-reactor/commits/main)
@@ -28,39 +34,13 @@
 
 ---
 
-<table>
-  <tr>
-    <td width="134px">
-      <a href="https://boosty.to/artgourieff" target="_blank">
-        <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Support Me on Boosty"/>
-        <br>
-        <sup>
-          Support This Project
-        </sup>
-      </a>
-    </td>
-    <td>
-      ReActor is an extension for Stable Diffusion WebUI that allows a very easy and accurate face-replacement (face swap) in images. Based on <a href="https://github.com/Gourieff/ReActor-UI" target="_blank">ReActor-UI</a>.
-    </td>
-    <td width="144px">
-      <a href="https://paypal.me/artgourieff" target="_blank">
-        <img src="https://www.paypalobjects.com/digitalassets/c/website/logo/full-text/pp_fc_hl.svg" width="108" alt="Support Me via PayPal"/>
-        <br>
-        <sup>
-          Donate to This Project
-        </sup>
-      </a>
-    </td>
-  </tr>
-</table>
-
 <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/demo_crop.jpg?raw=true" alt="example"/>
 
 <a name="latestupdate">
 
 ## What's new in the latest update
 
-### 0.5.1 <sub><sup>BETA2</sup></sub>
+### 0.5.1
 
 - You can now save face models as "safetensors" files (stored in `<sd-web-ui-folder>\models\reactor\faces`) and load them into ReActor, keeping super lightweight face models of the faces you use;
 - "Face Mask Correction" option - if you encounter some pixelation around face contours, this option will be useful;
