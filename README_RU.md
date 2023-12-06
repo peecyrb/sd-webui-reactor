@@ -1,6 +1,6 @@
 <div align="center">
 
-  <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_red_RU.png?raw=true" alt="logo" width="180px"/>
+  <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_NEW_RU.png?raw=true" alt="logo" width="180px"/>
     
   ![Version](https://img.shields.io/badge/версия-0.6.0_alpha1-lightgreen?style=for-the-badge&labelColor=darkgreen)
   
