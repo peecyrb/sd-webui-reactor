@@ -14,7 +14,8 @@ BASE_PATH = os.path.join(Path(__file__).parents[1])
 DEVICE_LIST: list = ["CPU", "CUDA"]
 
 MODELS_PATH = models_path
-REACTOR_MODELS_PATH = os.path.join(models_path, "reactor")
+SWAPPER_MODELS_PATH = os.path.join(MODELS_PATH, "insightface")
+REACTOR_MODELS_PATH = os.path.join(MODELS_PATH, "reactor")
 FACE_MODELS_PATH = os.path.join(REACTOR_MODELS_PATH, "faces")
 
 if not os.path.exists(REACTOR_MODELS_PATH):

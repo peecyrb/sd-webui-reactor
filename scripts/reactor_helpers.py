@@ -13,6 +13,16 @@ from modules.images import FilenameGenerator, get_next_sequence_number
 from modules import shared, script_callbacks
 from scripts.reactor_globals import DEVICE, BASE_PATH, FACE_MODELS_PATH
 
+try:
+    from modules.paths_internal import models_path
+except:
+    try:
+        from modules.paths import models_path
+    except:
+        model_path = os.path.abspath("models")
+
+MODELS_PATH = None
+
 def set_Device(value):
     global DEVICE
     DEVICE = value
@@ -155,6 +165,20 @@ def save_face_model(face: Face, filename: str) -> None:
     except Exception as e:
         print(f"Error: {e}")
 
+def get_models():
+    global MODELS_PATH
+    models_path_init = os.path.join(models_path, "insightface/*")
+    models = glob.glob(models_path_init)
+    models = [x for x in models if x.endswith(".onnx") or x.endswith(".pth")]
+    models_names = []
+    for model in models:
+        model_path = os.path.split(model)
+        if MODELS_PATH is None:
+            MODELS_PATH = model_path[0]
+        model_name = model_path[1]
+        models_names.append(model_name)
+    return models_names
+
 def load_face_model(filename: str):
     face = {}
     model_path = os.path.join(FACE_MODELS_PATH, filename)
@@ -175,3 +199,11 @@ def get_model_names(get_models):
     for x in models:
         names.append(os.path.basename(x))
     return names
+
+def get_images_from_folder(path: str):
+    images_path = os.path.join(path, "*")
+    images = glob.glob(images_path)
+    return [Image.open(x) for x in images if x.endswith(('jpg', 'png', 'jpeg', 'webp', 'bmp'))]
+
+def get_images_from_list(imgs: List):
+    return [Image.open(os.path.abspath(x.name)) for x in imgs]
