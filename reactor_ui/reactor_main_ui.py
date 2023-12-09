@@ -8,7 +8,7 @@ from scripts.reactor_swapper import (
 )
 from modules import shared
 
-SAVE_ORIGINAL: bool = False
+# SAVE_ORIGINAL: bool = False
 
 def update_fm_list(selected: str):
     return gr.Dropdown.update(
@@ -18,16 +18,17 @@ def update_fm_list(selected: str):
 # TAB MAIN
 def show(is_img2img: bool, show_br: bool = True, **msgs):
 
-    def on_select_source(selected: bool, evt: gr.SelectData):
-        global SAVE_ORIGINAL
+    # def on_select_source(selected: bool, evt: gr.SelectData):
+    def on_select_source(evt: gr.SelectData):
+        # global SAVE_ORIGINAL
         if evt.index == 2:
-            if SAVE_ORIGINAL != selected:
-                SAVE_ORIGINAL = selected
+            # if SAVE_ORIGINAL != selected:
+            #     SAVE_ORIGINAL = selected
             return {
                 control_col_1: gr.Column.update(visible=False),
                 control_col_2: gr.Column.update(visible=False),
                 control_col_3: gr.Column.update(visible=True),
-                save_original: gr.Checkbox.update(value=False,visible=False),
+                # save_original: gr.Checkbox.update(value=False,visible=False),
                 imgs_hash_clear: gr.Button.update(visible=True)
             }
         if evt.index == 0:
@@ -35,7 +36,7 @@ def show(is_img2img: bool, show_br: bool = True, **msgs):
                 control_col_1: gr.Column.update(visible=True),
                 control_col_2: gr.Column.update(visible=False),
                 control_col_3: gr.Column.update(visible=False),
-                save_original: gr.Checkbox.update(value=SAVE_ORIGINAL,visible=show_br),
+                # save_original: gr.Checkbox.update(value=SAVE_ORIGINAL,visible=show_br),
                 imgs_hash_clear: gr.Button.update(visible=False)
             }
         if evt.index == 1:
@@ -43,7 +44,7 @@ def show(is_img2img: bool, show_br: bool = True, **msgs):
                 control_col_1: gr.Column.update(visible=False),
                 control_col_2: gr.Column.update(visible=True),
                 control_col_3: gr.Column.update(visible=False),
-                save_original: gr.Checkbox.update(value=SAVE_ORIGINAL,visible=show_br),
+                # save_original: gr.Checkbox.update(value=SAVE_ORIGINAL,visible=show_br),
                 imgs_hash_clear: gr.Button.update(visible=False)
             }
         
@@ -106,13 +107,13 @@ def show(is_img2img: bool, show_br: bool = True, **msgs):
                 save_original = gr.Checkbox(
                     False,
                     label="Save Original (Swap in generated only)", 
-                    info="Save the original image(s) made before swapping (it always saves Original when you use Multiple Images or Folder)"
+                    info="Save the original image(s) made before swapping"
                 )
             else:
                 save_original = gr.Checkbox(
                     False,
                     label="Save Original", 
-                    info="Save the original image(s) made before swapping (it always saves Original when you use Multiple Images or Folder)",
+                    info="Save the original image(s) made before swapping",
                     visible=show_br
                 )
             # imgs.upload(on_files_upload_uncheck_so,[save_original],[save_original],show_progress=False)
@@ -177,6 +178,6 @@ def show(is_img2img: bool, show_br: bool = True, **msgs):
                 label="Swap in generated image",
                 visible=is_img2img,
             )
-    select_source.select(on_select_source,[save_original],[control_col_1,control_col_2,control_col_3,save_original,imgs_hash_clear],show_progress=False)
+    select_source.select(on_select_source,None,[control_col_1,control_col_2,control_col_3,imgs_hash_clear],show_progress=False)
 
     return img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated
