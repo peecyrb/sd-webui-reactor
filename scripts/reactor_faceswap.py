@@ -28,6 +28,7 @@ from scripts.console_log_patch import apply_logging_patch
 from scripts.reactor_helpers import (
     make_grid, 
     set_Device, 
+    get_SDNEXT
 )
 from scripts.reactor_globals import SWAPPER_MODELS_PATH #, DEVICE, DEVICE_LIST
 
@@ -50,6 +51,10 @@ class FaceSwapScript(scripts.Script):
             # def on_files_clear():
             #     clear_faces_list()
             #     return gr.Checkbox.update(value=SAVE_ORIGINAL,visible=True)
+
+            # SD.Next fix
+            if get_SDNEXT():
+                enable = gr.Checkbox(False, label="Enable")
             
             # enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
             gr.Markdown(f"<sup>The Fast and Simple FaceSwap Extension - {version_flag}</sup>")
@@ -408,6 +413,10 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
     def ui(self):
         with ui_components.InputAccordion(False, label=f"{app_title}") as enable:
         # with gr.Accordion(f"{app_title}", open=False):
+            
+            # SD.Next fix
+            if get_SDNEXT():
+                enable = gr.Checkbox(False, label="Enable")
 
             # enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
             gr.Markdown(f"<span style='display:block;font-size:0.75em;margin-bottom:-24px;'>The Fast and Simple FaceSwap Extension - {version_flag}</span>")

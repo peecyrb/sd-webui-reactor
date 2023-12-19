@@ -17,7 +17,8 @@ from scripts.reactor_helpers import (
     save_face_model, 
     load_face_model, 
     get_images_from_folder,
-    get_images_from_list
+    get_images_from_list,
+    set_SDNEXT
 )
 from scripts.console_log_patch import apply_logging_patch
 
@@ -26,6 +27,7 @@ try: # A1111
     from modules import codeformer_model, gfpgan_model
 except: # SD.Next
     from modules.postprocess import codeformer_model, gfpgan_model
+    set_SDNEXT()
 from modules.upscaler import UpscalerData
 from modules.shared import state
 from scripts.reactor_logger import logger

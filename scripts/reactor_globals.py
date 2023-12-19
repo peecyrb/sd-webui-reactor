@@ -18,6 +18,8 @@ SWAPPER_MODELS_PATH = os.path.join(MODELS_PATH, "insightface")
 REACTOR_MODELS_PATH = os.path.join(MODELS_PATH, "reactor")
 FACE_MODELS_PATH = os.path.join(REACTOR_MODELS_PATH, "faces")
 
+IS_SDNEXT = False
+
 if not os.path.exists(REACTOR_MODELS_PATH):
     os.makedirs(REACTOR_MODELS_PATH)
     if not os.path.exists(FACE_MODELS_PATH):

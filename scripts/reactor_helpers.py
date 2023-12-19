@@ -11,7 +11,7 @@ from insightface.app.common import Face
 
 from modules.images import FilenameGenerator, get_next_sequence_number
 from modules import shared, script_callbacks
-from scripts.reactor_globals import DEVICE, BASE_PATH, FACE_MODELS_PATH
+from scripts.reactor_globals import DEVICE, BASE_PATH, FACE_MODELS_PATH, IS_SDNEXT
 
 try:
     from modules.paths_internal import models_path
@@ -32,6 +32,14 @@ def set_Device(value):
 def get_Device():
     global DEVICE
     return DEVICE
+
+def set_SDNEXT():
+    global IS_SDNEXT
+    IS_SDNEXT = True
+
+def get_SDNEXT():
+    global IS_SDNEXT
+    return IS_SDNEXT
 
 def make_grid(image_list: List):
     
