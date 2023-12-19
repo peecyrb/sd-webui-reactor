@@ -31,7 +31,7 @@ args=[
     1, #5 Restore visibility value
     True, #7 Restore face -> Upscale
     '4x_NMKD-Superscale-SP_178000_G', #8 Upscaler (type 'None' if doesn't need), see full list here: http://127.0.0.1:7860/sdapi/v1/script-info -> reactor -> sec.8
-    2, #9 Upscaler scale value
+    1.5, #9 Upscaler scale value
     1, #10 Upscaler visibility (if scale = 1)
     False, #11 Swap in source image
     True, #12 Swap in generated image

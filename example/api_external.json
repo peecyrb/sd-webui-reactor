@@ -4,7 +4,7 @@
     "source_faces_index": [0],
     "face_index": [2],
     "upscaler": "None",
-    "scale": 1,
+    "scale": 1.5,
     "upscale_visibility": 1,
     "face_restorer": "CodeFormer",
     "restorer_visibility": 1,

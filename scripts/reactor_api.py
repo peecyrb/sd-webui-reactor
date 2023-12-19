@@ -60,7 +60,7 @@ def reactor_api(_: gr.Blocks, app: FastAPI):
         source_faces_index: list[int] = Body([0],title="Comma separated face number(s) from swap-source image"),
         face_index: list[int] = Body([0],title="Comma separated face number(s) for target image (result)"),
         upscaler: str = Body("None",title="Upscaler"),
-        scale: int = Body(1,title="Scale by"),
+        scale: float = Body(1,title="Scale by"),
         upscale_visibility: float = Body(1,title="Upscaler visibility (if scale = 1)"),
         face_restorer: str = Body("None",title="Restore Face: 0 - None; 1 - CodeFormer; 2 - GFPGA"),
         restorer_visibility: float = Body(1,title="Restore visibility value"),

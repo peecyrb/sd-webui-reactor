@@ -309,10 +309,7 @@ class FaceSwapScript(scripts.Script):
 
                         if self.select_source == 2 or (self.select_source == 0 and self.source_imgs is not None and self.source is None):
                             if len(result) > 0 and swapped > 0:
-                                if self.save_original:
-                                    result_images.extend(result)
-                                else:
-                                    result_images = result
+                                result_images.extend(result)
                                 suffix = "-swapped"
                                 for i,x in enumerate(result):
                                     try:
