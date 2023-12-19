@@ -6,7 +6,7 @@ from typing import List
 
 import modules.scripts as scripts
 from modules.upscaler import Upscaler, UpscalerData
-from modules import scripts, shared, images, scripts_postprocessing
+from modules import scripts, shared, images, scripts_postprocessing, ui_components
 from modules.processing import (
     Processed,
     StableDiffusionProcessing,
@@ -40,7 +40,8 @@ class FaceSwapScript(scripts.Script):
         return scripts.AlwaysVisible
 
     def ui(self, is_img2img):
-        with gr.Accordion(f"{app_title}", open=False):
+        with ui_components.InputAccordion(False, label=f"{app_title}") as enable:
+        # with gr.Accordion(f"{app_title}", open=False):
 
             # def on_files_upload_uncheck_so(selected: bool):
             #     global SAVE_ORIGINAL
@@ -50,8 +51,8 @@ class FaceSwapScript(scripts.Script):
             #     clear_faces_list()
             #     return gr.Checkbox.update(value=SAVE_ORIGINAL,visible=True)
             
-            enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
-            gr.Markdown("<br>")
+            # enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
+            gr.Markdown(f"<sup>The Fast and Simple FaceSwap Extension - {version_flag}</sup>")
 
             # TAB MAIN
             msgs: dict = {
@@ -405,9 +406,11 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
     order = 20000
 
     def ui(self):
-        with gr.Accordion(f"{app_title}", open=False):
+        with ui_components.InputAccordion(False, label=f"{app_title}") as enable:
+        # with gr.Accordion(f"{app_title}", open=False):
 
-            enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
+            # enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
+            gr.Markdown(f"<span style='display:block;font-size:0.75em;margin-bottom:-24px;'>The Fast and Simple FaceSwap Extension - {version_flag}</span>")
 
             # TAB MAIN
             msgs: dict = {

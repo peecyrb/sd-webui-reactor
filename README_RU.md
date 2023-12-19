@@ -2,7 +2,7 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_NEW_RU.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.6.0_alpha2-lightgreen?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/версия-0.6.0_alpha3-lightgreen?style=for-the-badge&labelColor=darkgreen)
   
   <a href="https://boosty.to/artgourieff" target="_blank">
     <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Поддержать проект на Boosty"/>
@@ -264,10 +264,10 @@ Inpainting также работает, но замена лица происх�
 ### **VIII. (Для пользователей Windows) Если вы до сих пор не можете установить пакет Insightface по каким-то причинам или же просто не желаете устанавливать Visual Studio или VS C++ Build Tools - сделайте следующее:**
 
 1. Закройте (остановите) SD WebUI Сервер, если он запущен
-2. Скачайте готовый [пакет Insightface](https://github.com/Gourieff/sd-webui-reactor/raw/main/example/insightface-0.7.3-cp310-cp310-win_amd64.whl) и сохраните его в корневую директорию stable-diffusion-webui (или SD.Next) - туда, где лежит файл "webui-user.bat"
-3. Из корневой директории откройте Консоль (CMD) и выполните `.\venv\Scripts\activate`
-4. Обновите PIP: `python -m pip install -U pip`
-5. Затем установите Insightface: `pip install insightface-0.7.3-cp310-cp310-win_amd64.whl`
+2. Скачайте готовый [пакет Insightface](https://github.com/Gourieff/sd-webui-reactor/raw/main/example/insightface-0.7.3-cp310-cp310-win_amd64.whl) и сохраните его в корневую директорию stable-diffusion-webui (или SD.Next) - туда, где лежит файл "webui-user.bat" или (A1111 Portable) "run.bat"
+3. Из корневой директории откройте Консоль (CMD) и выполните `.\venv\Scripts\activate`<br>ИЛИ<br>(A1111 Portable) Откройте Консоль (CMD)
+4. Обновите PIP: `python -m pip install -U pip`<br>ИЛИ<br>(A1111 Portable)`system\python\python.exe -m pip install -U pip`
+5. Затем установите Insightface: `pip install insightface-0.7.3-cp310-cp310-win_amd64.whl`<br>ИЛИ<br>(A1111 Portable)`system\python\python.exe -m pip install insightface-0.7.3-cp310-cp310-win_amd64.whl`
 6. Готово!
 
 ### **IX. Ошибка обновления 07-Август-23**

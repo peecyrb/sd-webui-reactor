@@ -23,9 +23,9 @@ from scripts.console_log_patch import apply_logging_patch
 
 from modules.face_restoration import FaceRestoration
 try: # A1111
-    from modules import codeformer_model
+    from modules import codeformer_model, gfpgan_model
 except: # SD.Next
-    from modules.postprocess import codeformer_model
+    from modules.postprocess import codeformer_model, gfpgan_model
 from modules.upscaler import UpscalerData
 from modules.shared import state
 from scripts.reactor_logger import logger
@@ -142,8 +142,9 @@ def restore_face(image: Image, enhancement_options: EnhancementOptions):
             numpy_image = codeformer_model.codeformer.restore(
                 numpy_image, w=enhancement_options.codeformer_weight
             )
-        else:
-            numpy_image = enhancement_options.face_restorer.restore(numpy_image)
+        else: # GFPGAN:
+            numpy_image = gfpgan_model.gfpgan_fix_faces(numpy_image)
+            # numpy_image = enhancement_options.face_restorer.restore(numpy_image)
         restored_image = Image.fromarray(numpy_image)
         result_image = Image.blend(
             original_image, restored_image, enhancement_options.restorer_visibility
