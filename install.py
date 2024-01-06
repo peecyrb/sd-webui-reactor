@@ -35,7 +35,7 @@ models_dir = os.path.join(models_path, "insightface")
 #         except Exception as e:
 #             print(f"OSError: {e}")
             
-model_url = "https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128.onnx"
+model_url = "https://huggingface.co/datasets/Gourieff/ReActor/resolve/main/models/inswapper_128.onnx"
 model_name = os.path.basename(model_url)
 model_path = os.path.join(models_dir, model_name)
 
