@@ -164,7 +164,7 @@ def show(is_img2img: bool, show_br: bool = True, **msgs):
                         0, 1, 1, step=0.1, label="Restore Face Visibility"
                     )
                     codeformer_weight = gr.Slider(
-                        0, 1, 0.5, step=0.1, label="CodeFormer Weight", info="0 = maximum effect, 1 = minimum effect"
+                        0, 1, 0.5, step=0.1, label="CodeFormer Weight (Fidelity)", info="0 = far from original (max restoration), 1 = close to original (min restoration)"
                     )
             gr.Markdown("<br>", visible=show_br)
             swap_in_source = gr.Checkbox(

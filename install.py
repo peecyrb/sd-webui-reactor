@@ -75,7 +75,7 @@ if not os.path.exists(models_dir):
 if not os.path.exists(model_path):
     download(model_url, model_path)
 
-print("ReActor preheating...", end=' ')
+# print("ReActor preheating...", end=' ')
 
 last_device = None
 first_run = False
@@ -121,7 +121,7 @@ with open(req_file) as file:
         print(e)
         print(f"\nERROR: Failed to install {ort} - ReActor won't start")
         raise e
-    print(f"Device: {last_device}")
+    # print(f"Device: {last_device}")
     strict = True
     for package in file:
         package_version = None
