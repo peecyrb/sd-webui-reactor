@@ -1,7 +1,7 @@
 '''
 Thanks SpenserCai for the original version of the roop api script
 -----------------------------------
---- ReActor External API v1.0.1 ---
+--- ReActor External API v1.0.2 ---
 -----------------------------------
 '''
 import os, glob
@@ -77,7 +77,7 @@ def reactor_api(_: gr.Blocks, app: FastAPI):
         face_model: str = Body("None",title="Filename of the face model (from 'models/reactor/faces'), e.g. elena.safetensors"),
         source_folder: str = Body("",title="The path to the folder containing source faces images")
     ):
-        s_image = api.decode_base64_to_image(source_image)
+        s_image = api.decode_base64_to_image(source_image) if select_source == 0 else None
         t_image = api.decode_base64_to_image(target_image)
         sf_index = source_faces_index
         f_index = face_index
