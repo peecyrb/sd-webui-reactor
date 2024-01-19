@@ -17,6 +17,7 @@ from scripts.reactor_helpers import (
     save_face_model, 
     load_face_model, 
     get_images_from_folder,
+    get_random_image_from_folder,
     get_images_from_list,
     set_SDNEXT
 )
@@ -335,6 +336,7 @@ def swap_face(
     face_model: str = "None",
     source_folder: str = "",
     source_imgs: Union[List, None] = None,
+    random_image: bool = False,
 ):
     global SOURCE_FACES, SOURCE_IMAGE_HASH, TARGET_FACES, TARGET_IMAGE_HASH, PROVIDERS, SOURCE_FACES_LIST, SOURCE_IMAGE_LIST_HASH
 
@@ -376,7 +378,11 @@ def swap_face(
 
             result = []
 
-            source_images = get_images_from_folder(source_folder) if select_source == 2 else get_images_from_list(source_imgs)
+            if random_image and select_source == 2:
+                source_images = get_random_image_from_folder(source_folder)
+                logger.status("Processing with Random Image from the folder")
+            else:
+                source_images = get_images_from_folder(source_folder) if select_source == 2 else get_images_from_list(source_imgs)
 
             if len(source_images) > 0:
                 source_img_ff = []

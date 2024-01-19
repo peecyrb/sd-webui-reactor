@@ -47,6 +47,8 @@ args=[
     1, #22 Select Source, 0 - Image, 1 - Face Model, 2 - Source Folder
     "elena.safetensors", #23 Filename of the face model (from "models/reactor/faces"), e.g. elena.safetensors, don't forger to set #22 to 1
     "C:\PATH_TO_FACES_IMAGES", #24 The path to the folder containing source faces images, don't forger to set #22 to 2
+    None, #25 skip it for API
+    True, #26 Randomly select an image from the path
 ]
 
 # The args for ReActor can be found by 

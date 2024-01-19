@@ -2,7 +2,7 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_NEW_EN.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/version-0.6.1_beta1-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/version-0.6.1_beta2-green?style=for-the-badge&labelColor=darkgreen)
   
   <a href="https://boosty.to/artgourieff" target="_blank">
     <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Support Me on Boosty"/>
@@ -40,8 +40,18 @@
 
 ## What's new in the latest updates
 
-### 0.6.0 <sub><sup>ALPHA1
+### 0.6.1 <sub><sup>BETA2
 
+- 'Save orignal' option works fine now when you select 'Multiple Images' or 'Source Folder'
+- Random Mode for 'Source Folder'
+
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/random_from_folder_demo_01.jpg?raw=true" alt="0.6.1-whatsnew-01" width="100%"/>
+
+### 0.6.0
+
+- New Logo
+- Adaptation to A1111 1.7.0 (appropriate GFPGAN loader)
+- New URL for the main model file
 - UI reworked
 - You can now load several source images (with reference faces) or set the path to the folder containing faces images
 

@@ -2,7 +2,7 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_NEW_RU.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.6.1_beta1-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/версия-0.6.1_beta2-green?style=for-the-badge&labelColor=darkgreen)
   
   <a href="https://boosty.to/artgourieff" target="_blank">
     <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Поддержать проект на Boosty"/>
@@ -39,8 +39,18 @@
 
 ## Что нового в последних обновлениях
 
-### 0.6.0 <sub><sup>ALPHA1
+### 0.6.1 <sub><sup>BETA2
 
+- Опция 'Save orignal' теперь работает правильно, когда вы выбираете 'Multiple Images' или 'Source Folder'
+- Добавлен режим выбора случайного изображения для 'Source Folder'
+
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/random_from_folder_demo_01.jpg?raw=true" alt="0.6.1-whatsnew-01" width="100%"/>
+
+### 0.6.0
+
+- Новый логотип
+- Адаптация к версии A1111 1.7.0 (правильная загрузка GFPGAN)
+- Новая ссылка для файла основной модели
 - UI переработан
 - Появилась возможность загружать несколько исходных изображений с лицами или задавать путь к папке, содержащей такие изображения
 

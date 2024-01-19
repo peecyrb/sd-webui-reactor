@@ -1,4 +1,4 @@
-import os, glob
+import os, glob, random
 from collections import Counter
 from PIL import Image
 from math import isqrt, ceil
@@ -212,6 +212,11 @@ def get_images_from_folder(path: str):
     images_path = os.path.join(path, "*")
     images = glob.glob(images_path)
     return [Image.open(x) for x in images if x.endswith(('jpg', 'png', 'jpeg', 'webp', 'bmp'))]
+
+def get_random_image_from_folder(path: str):
+    images = get_images_from_folder(path)
+    random_image_index = random.randint(0, len(images) - 1)
+    return [images[random_image_index]]
 
 def get_images_from_list(imgs: List):
     return [Image.open(os.path.abspath(x.name)) for x in imgs]

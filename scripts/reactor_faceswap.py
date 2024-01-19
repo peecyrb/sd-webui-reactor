@@ -63,7 +63,7 @@ class FaceSwapScript(scripts.Script):
             msgs: dict = {
                 "extra_multiple_source": "",
             }
-            img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated = ui_main.show(is_img2img=is_img2img, **msgs)
+            img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image = ui_main.show(is_img2img=is_img2img, **msgs)
             
             # TAB UPSCALE
             restore_first, upscaler_name, upscaler_scale, upscaler_visibility = ui_upscale.show()
@@ -103,6 +103,7 @@ class FaceSwapScript(scripts.Script):
             face_model,
             source_folder,
             imgs,
+            random_image,
         ]
 
 
@@ -161,6 +162,7 @@ class FaceSwapScript(scripts.Script):
         face_model,
         source_folder,
         imgs,
+        random_image,
     ):
         self.enable = enable
         if self.enable:
@@ -195,6 +197,7 @@ class FaceSwapScript(scripts.Script):
             self.face_model = face_model
             self.source_folder = source_folder
             self.source_imgs = imgs
+            self.random_image = random_image
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -217,9 +220,14 @@ class FaceSwapScript(scripts.Script):
                 self.target_hash_check = False
             if self.mask_face is None:
                 self.mask_face = False
+            if self.random_image is None:
+                self.random_image = False
 
             logger.debug("*** Set Device")
             set_Device(self.device)
+
+            if (self.save_original is None or not self.save_original) and (self.select_source == 2 or self.source_imgs is not None):
+                p.do_not_save_samples = True
             
             if ((self.source is not None or self.source_imgs is not None) and self.select_source == 0) or ((self.face_model is not None and self.face_model != "None") and self.select_source == 1) or ((self.source_folder is not None and self.source_folder != "") and self.select_source == 2):
                 logger.debug("*** Log patch")
@@ -247,6 +255,7 @@ class FaceSwapScript(scripts.Script):
                             face_model = self.face_model,
                             source_folder = None,
                             source_imgs = None,
+                            random_image = False,
                         )
                         p.init_images[i] = result
                         # result_path = get_image_path(p.init_images[i], p.outpath_samples, "", p.all_seeds[i], p.all_prompts[i], "txt", p=p, suffix="-swapped")
@@ -311,17 +320,23 @@ class FaceSwapScript(scripts.Script):
                             face_model = self.face_model,
                             source_folder = self.source_folder,
                             source_imgs = self.source_imgs,
+                            random_image = self.random_image,
                         )
 
                         if self.select_source == 2 or (self.select_source == 0 and self.source_imgs is not None and self.source is None):
                             if len(result) > 0 and swapped > 0:
-                                result_images.extend(result)
+                                # result_images.extend(result)
+                                if self.save_original:
+                                    result_images.extend(result)
+                                else:
+                                    result_images = result
                                 suffix = "-swapped"
                                 for i,x in enumerate(result):
                                     try:
-                                        img_path = save_image(result[i], p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "png",info=info, p=p, suffix=suffix)
+                                        img_path = save_image(result[i], p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "png", info=info, p=p, suffix=suffix)
                                     except:
                                         logger.error("Cannot save a result image - please, check SD WebUI Settings (Saving and Paths)")
+
                             elif len(result) == 0:
                                 logger.error("Cannot create a result image")
 
@@ -330,7 +345,7 @@ class FaceSwapScript(scripts.Script):
                                 result_images.append(result)
                                 suffix = "-swapped"
                                 try:
-                                    img_path = save_image(result, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "png",info=info, p=p, suffix=suffix)
+                                    img_path = save_image(result, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "png", info=info, p=p, suffix=suffix)
                                 except:
                                     logger.error("Cannot save a result image - please, check SD WebUI Settings (Saving and Paths)")
                             elif result is None:
@@ -390,6 +405,7 @@ class FaceSwapScript(scripts.Script):
                 face_model = self.face_model,
                 source_folder = None,
                 source_imgs = None,
+                random_image = False,
             )
             try:
                 pp = scripts_postprocessing.PostprocessedImage(result)
@@ -425,7 +441,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             msgs: dict = {
                 "extra_multiple_source": " | Сomparison grid as a result",
             }
-            img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated = ui_main.show(is_img2img=False, show_br=False, **msgs)
+            img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image = ui_main.show(is_img2img=False, show_br=False, **msgs)
             
             # TAB UPSCALE
             restore_first, upscaler_name, upscaler_scale, upscaler_visibility = ui_upscale.show(show_br=False)
@@ -460,6 +476,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             'face_model': face_model,
             'source_folder': source_folder,
             'imgs': imgs,
+            'random_image': random_image,
         }
         return args
 
@@ -514,6 +531,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             self.face_model = args['face_model']
             self.source_folder = args['source_folder']
             self.source_imgs = args['imgs']
+            self.random_image = args['random_image']
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -530,6 +548,8 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                 self.faces_index = [0]
             if self.mask_face is None:
                 self.mask_face = False
+            if self.random_image is None:
+                self.random_image = False
 
             current_job_number = shared.state.job_no + 1
             job_count = shared.state.job_count
@@ -565,6 +585,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                     face_model=self.face_model,
                     source_folder=self.source_folder,
                     source_imgs=self.source_imgs,
+                    random_image=self.random_image,
                 )
                 if self.select_source == 2 or (self.select_source == 0 and self.source_imgs is not None and self.source is None):
                     if len(result) > 0 and swapped > 0:
