@@ -42,7 +42,7 @@
 
 ### 0.6.1 <sub><sup>BETA2
 
-- 'Save orignal' option works fine now when you select 'Multiple Images' or 'Source Folder'
+- 'Save original' option works fine now when you select 'Multiple Images' or 'Source Folder'
 - Random Mode for 'Source Folder'
 
 <img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/random_from_folder_demo_01.jpg?raw=true" alt="0.6.1-whatsnew-01" width="100%"/>

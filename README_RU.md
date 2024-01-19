@@ -41,7 +41,7 @@
 
 ### 0.6.1 <sub><sup>BETA2
 
-- Опция 'Save orignal' теперь работает правильно, когда вы выбираете 'Multiple Images' или 'Source Folder'
+- Опция 'Save original' теперь работает правильно, когда вы выбираете 'Multiple Images' или 'Source Folder'
 - Добавлен режим выбора случайного изображения для 'Source Folder'
 
 <img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/random_from_folder_demo_01.jpg?raw=true" alt="0.6.1-whatsnew-01" width="100%"/>
