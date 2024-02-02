@@ -43,6 +43,7 @@
 ### 0.6.1 <sub><sup>BETA3
 
 - 'Force Upscale' option inside the 'Upscale' tab: ReActor will run the Upscaler even if there's no face is detected (FR https://github.com/Gourieff/sd-webui-reactor/issues/116)
+- ReActor shows filenames of source images in-process when the multiple images mode or the folder mode (random as well) is selected
 
 ### 0.6.1 <sub><sup>BETA2
 

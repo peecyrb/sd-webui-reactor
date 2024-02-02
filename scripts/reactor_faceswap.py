@@ -238,7 +238,11 @@ class FaceSwapScript(scripts.Script):
             if ((self.source is not None or self.source_imgs is not None) and self.select_source == 0) or ((self.face_model is not None and self.face_model != "None") and self.select_source == 1) or ((self.source_folder is not None and self.source_folder != "") and self.select_source == 2):
                 logger.debug("*** Log patch")
                 apply_logging_patch(console_logging_level)
+                
                 if isinstance(p, StableDiffusionProcessingImg2Img) and self.swap_in_source:
+
+                    logger.debug("*** Check process")
+
                     logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
 
                     for i in range(len(p.init_images)):
@@ -279,13 +283,15 @@ class FaceSwapScript(scripts.Script):
     def postprocess(self, p: StableDiffusionProcessing, processed: Processed, *args):
         if self.enable:
 
-            logger.debug("*** Check postprocess")
+            logger.debug("*** Check postprocess - before IF")
 
             reset_messaged()
             if check_process_halt():
                 return
 
             if self.save_original or ((self.select_source == 2 and self.source_folder is not None and self.source_folder != "") or (self.select_source == 0 and self.source_imgs is not None and self.source is None)):
+
+                logger.debug("*** Check postprocess - after IF")
 
                 postprocess_run: bool = True
 
@@ -373,6 +379,21 @@ class FaceSwapScript(scripts.Script):
                 
                 processed.images = result_images
                 # processed.infotexts = result_info
+            
+            elif self.select_source == 0 and self.source is not None and self.source_imgs is not None:
+
+                logger.debug("*** Check postprocess - after ELIF")
+
+                if self.result is not None:
+                    orig_infotexts : List[str] = processed.infotexts[processed.index_of_first_image:]
+                    processed.images = [self.result]
+                    try:
+                        img_path = save_image(self.result, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "png", info=orig_infotexts[0], p=p, suffix="")
+                    except:
+                        logger.error("Cannot save a result image - please, check SD WebUI Settings (Saving and Paths)")
+                else:
+                    logger.error("Cannot create a result image")
+
     
     def postprocess_batch(self, p, *args, **kwargs):
         if self.enable and not self.save_original:
@@ -392,7 +413,7 @@ class FaceSwapScript(scripts.Script):
                 return
             
             # if (self.source is not None and self.select_source == 0) or ((self.face_model is not None and self.face_model != "None") and self.select_source == 1):
-            logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
+            logger.status("! Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
             image: Image.Image = script_pp.image
             result, output, swapped = swap_face(
                 self.source,
@@ -413,6 +434,7 @@ class FaceSwapScript(scripts.Script):
                 source_imgs = None,
                 random_image = False,
             )
+            self.result = result
             try:
                 pp = scripts_postprocessing.PostprocessedImage(result)
                 pp.info = {}
@@ -574,6 +596,9 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             if (self.source is not None and self.select_source == 0) or ((self.face_model is not None and self.face_model != "None") and self.select_source == 1) or ((self.source_folder is not None and self.source_folder != "") and self.select_source == 2) or ((self.source_imgs is not None and self.source is None) and self.select_source == 0):
 
                 logger.debug("We're here: process() 2")
+
+                if self.source is not None and self.select_source == 0:
+                    self.source_imgs = None
 
                 apply_logging_patch(self.console_logging_level)
                 logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)

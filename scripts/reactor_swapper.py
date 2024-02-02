@@ -380,10 +380,10 @@ def swap_face(
             result = []
 
             if random_image and select_source == 2:
-                source_images = get_random_image_from_folder(source_folder)
-                logger.status("Processing with Random Image from the folder")
+                source_images,source_images_names = get_random_image_from_folder(source_folder)
+                logger.status(f"Processing with Random Image from the folder: {source_images_names[0]}")
             else:
-                source_images = get_images_from_folder(source_folder) if select_source == 2 else get_images_from_list(source_imgs)
+                source_images,source_images_names = get_images_from_folder(source_folder) if select_source == 2 else get_images_from_list(source_imgs)
 
             if len(source_images) > 0:
                 source_img_ff = []
@@ -412,15 +412,15 @@ def swap_face(
                         logger.info("(Image %s) Source Image the Same? %s", i, source_image_same)
 
                         if len(SOURCE_FACES_LIST) == 0:
-                            logger.status(f"Analyzing Source Image {i}...")
+                            logger.status(f"Analyzing Source Image {i}: {source_images_names[i]}...")
                             source_faces = analyze_faces(source_image)
                             SOURCE_FACES_LIST = [source_faces]
                         elif len(SOURCE_FACES_LIST) == i and not source_image_same:
-                            logger.status(f"Analyzing Source Image {i}...")
+                            logger.status(f"Analyzing Source Image {i}: {source_images_names[i]}...")
                             source_faces = analyze_faces(source_image)
                             SOURCE_FACES_LIST.append(source_faces)
                         elif len(SOURCE_FACES_LIST) != i and not source_image_same:
-                            logger.status(f"Analyzing Source Image {i}...")
+                            logger.status(f"Analyzing Source Image {i}: {source_images_names[i]}...")
                             source_faces = analyze_faces(source_image)
                             SOURCE_FACES_LIST[i] = source_faces
                         elif source_image_same:
