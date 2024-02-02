@@ -64,6 +64,7 @@ class EnhancementOptions:
     face_restorer: FaceRestoration = None
     restorer_visibility: float = 0.5
     codeformer_weight: float = 0.5
+    upscale_force: bool = False
 
 
 MESSAGED_STOPPED = False
@@ -713,7 +714,7 @@ def operate(
 
     result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
     
-    if enhancement_options is not None and swapped > 0:
+    if (enhancement_options is not None and swapped > 0) or enhancement_options.upscale_force:
         if mask_face and entire_mask_image is not None:
             result_image = enhance_image_and_mask(result_image, enhancement_options,Image.fromarray(target_img_orig),Image.fromarray(entire_mask_image).convert("L"))    
         else:    

@@ -66,7 +66,7 @@ class FaceSwapScript(scripts.Script):
             img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image = ui_main.show(is_img2img=is_img2img, **msgs)
             
             # TAB UPSCALE
-            restore_first, upscaler_name, upscaler_scale, upscaler_visibility = ui_upscale.show()
+            restore_first, upscaler_name, upscaler_scale, upscaler_visibility, upscale_force = ui_upscale.show()
 
             # TAB TOOLS
             ui_tools.show()
@@ -104,6 +104,7 @@ class FaceSwapScript(scripts.Script):
             source_folder,
             imgs,
             random_image,
+            upscale_force
         ]
 
 
@@ -124,13 +125,14 @@ class FaceSwapScript(scripts.Script):
     @property
     def enhancement_options(self) -> EnhancementOptions:
         return EnhancementOptions(
-            do_restore_first = self.restore_first,
+            do_restore_first=self.restore_first,
             scale=self.upscaler_scale,
             upscaler=self.upscaler,
             face_restorer=self.face_restorer,
             upscale_visibility=self.upscaler_visibility,
             restorer_visibility=self.face_restorer_visibility,
             codeformer_weight=self.codeformer_weight,
+            upscale_force=self.upscale_force
         )
 
     def process(
@@ -163,6 +165,7 @@ class FaceSwapScript(scripts.Script):
         source_folder,
         imgs,
         random_image,
+        upscale_force,
     ):
         self.enable = enable
         if self.enable:
@@ -198,6 +201,7 @@ class FaceSwapScript(scripts.Script):
             self.source_folder = source_folder
             self.source_imgs = imgs
             self.random_image = random_image
+            self.upscale_force = upscale_force
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -222,6 +226,8 @@ class FaceSwapScript(scripts.Script):
                 self.mask_face = False
             if self.random_image is None:
                 self.random_image = False
+            if self.upscale_force is None:
+                self.upscale_force = False
 
             logger.debug("*** Set Device")
             set_Device(self.device)
@@ -444,7 +450,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image = ui_main.show(is_img2img=False, show_br=False, **msgs)
             
             # TAB UPSCALE
-            restore_first, upscaler_name, upscaler_scale, upscaler_visibility = ui_upscale.show(show_br=False)
+            restore_first, upscaler_name, upscaler_scale, upscaler_visibility, upscale_force = ui_upscale.show(show_br=False)
                         
             # TAB TOOLS
             ui_tools.show()
@@ -477,6 +483,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             'source_folder': source_folder,
             'imgs': imgs,
             'random_image': random_image,
+            'upscale_force': upscale_force,
         }
         return args
 
@@ -504,6 +511,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             upscale_visibility=self.upscaler_visibility,
             restorer_visibility=self.face_restorer_visibility,
             codeformer_weight=self.codeformer_weight,
+            upscale_force=self.upscale_force,
         )
 
     def process(self, pp: scripts_postprocessing.PostprocessedImage, **args):
@@ -532,6 +540,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             self.source_folder = args['source_folder']
             self.source_imgs = args['imgs']
             self.random_image = args['random_image']
+            self.upscale_force = args['upscale_force']
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -550,6 +559,8 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                 self.mask_face = False
             if self.random_image is None:
                 self.random_image = False
+            if self.upscale_force is None:
+                self.upscale_force = False
 
             current_job_number = shared.state.job_no + 1
             job_count = shared.state.job_count

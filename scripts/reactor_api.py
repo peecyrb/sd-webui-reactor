@@ -1,7 +1,7 @@
 '''
 Thanks SpenserCai for the original version of the roop api script
 -----------------------------------
---- ReActor External API v1.0.3 ---
+--- ReActor External API v1.0.4 ---
 -----------------------------------
 '''
 import os, glob
@@ -76,7 +76,8 @@ def reactor_api(_: gr.Blocks, app: FastAPI):
         select_source: int = Body(0,title="Select Source, 0 - Image, 1 - Face Model, 2 - Source Folder"),
         face_model: str = Body("None",title="Filename of the face model (from 'models/reactor/faces'), e.g. elena.safetensors"),
         source_folder: str = Body("",title="The path to the folder containing source faces images"),
-        random_image: int = Body(0,title="Randomly select an image from the path")
+        random_image: int = Body(0,title="Randomly select an image from the path"),
+        upscale_force: int = Body(0,title="Force Upscale even if no face found")
     ):
         s_image = api.decode_base64_to_image(source_image) if select_source == 0 else None
         t_image = api.decode_base64_to_image(target_image)
@@ -87,7 +88,8 @@ def reactor_api(_: gr.Blocks, app: FastAPI):
         restore_first_bool = True if restore_first == 1 else False
         mask_face = True if mask_face == 1 else False
         random_image = False if random_image == 0 else True
-        up_options = EnhancementOptions(do_restore_first=restore_first_bool, scale=scale, upscaler=get_upscaler(upscaler), upscale_visibility=upscale_visibility,face_restorer=get_face_restorer(face_restorer),restorer_visibility=restorer_visibility,codeformer_weight=codeformer_weight)
+        upscale_force = False if upscale_force == 0 else True
+        up_options = EnhancementOptions(do_restore_first=restore_first_bool, scale=scale, upscaler=get_upscaler(upscaler), upscale_visibility=upscale_visibility,face_restorer=get_face_restorer(face_restorer),restorer_visibility=restorer_visibility,codeformer_weight=codeformer_weight,upscale_force=upscale_force)
         use_model = get_full_model(model)
         if use_model is None:
             Exception("Model not found")

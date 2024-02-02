@@ -2,7 +2,7 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_NEW_RU.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.6.1_beta2-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/версия-0.6.1_beta3-green?style=for-the-badge&labelColor=darkgreen)
   
   <a href="https://boosty.to/artgourieff" target="_blank">
     <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Поддержать проект на Boosty"/>
@@ -38,6 +38,10 @@
 <a name="latestupdate">
 
 ## Что нового в последних обновлениях
+
+### 0.6.1 <sub><sup>BETA3
+
+- Опция 'Force Upscale' внутри вкладки 'Upscale': апскейл выполнится, даже если не было обнаружено ни одного лица (FR https://github.com/Gourieff/sd-webui-reactor/issues/116)
 
 ### 0.6.1 <sub><sup>BETA2
 
