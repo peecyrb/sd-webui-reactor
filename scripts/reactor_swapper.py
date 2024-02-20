@@ -626,7 +626,7 @@ def swap_face(
     
     return result_image, [], 0
 
-def build_face_model(image: Image.Image, name: str, save_model: bool = True):
+def build_face_model(image: Image.Image, name: str, save_model: bool = True, det_size=(640, 640)):
     if image is None:
         error_msg = "Please load an Image"
         logger.error(error_msg)
@@ -639,7 +639,12 @@ def build_face_model(image: Image.Image, name: str, save_model: bool = True):
     image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     if save_model:
         logger.status("Building Face Model...")
-    face_model = analyze_faces(image)
+    face_model = analyze_faces(image, det_size)
+
+    if len(face_model) == 0:
+        det_size_half = half_det_size(det_size)
+        face_model = analyze_faces(image, det_size_half)
+    
     if face_model is not None and len(face_model) > 0:
         if save_model:
             face_model_path = os.path.join(FACE_MODELS_PATH, name + ".safetensors")
