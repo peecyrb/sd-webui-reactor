@@ -281,7 +281,7 @@ If this method doesn't help - there is some other extension that has a wrong ver
 ### **VIII. (For Windows users) If you still cannot build Insightface for some reasons or just don't want to install Visual Studio or VS C++ Build Tools - do the following:**
 
 1. Close (stop) your SD WebUI Server if it's running
-2. Download and put [prebuilt Insightface package](https://github.com/Gourieff/sd-webui-reactor/raw/main/example/insightface-0.7.3-cp310-cp310-win_amd64.whl) into the stable-diffusion-webui (or SD.Next) root folder where you have "webui-user.bat" file or (A1111 Portable) "run.bat"
+2. Download and put [prebuilt Insightface package](https://github.com/Gourieff/Assets/raw/main/Insightface/insightface-0.7.3-cp310-cp310-win_amd64.whl) into the stable-diffusion-webui (or SD.Next) root folder where you have "webui-user.bat" file or (A1111 Portable) "run.bat"
 3. From stable-diffusion-webui (or SD.Next) root folder run CMD and `.\venv\Scripts\activate`<br>OR<br>(A1111 Portable) Run CMD
 4. Then update your PIP: `python -m pip install -U pip`<br>OR<br>(A1111 Portable)`system\python\python.exe -m pip install -U pip`
 5. Then install Insightface: `pip install insightface-0.7.3-cp310-cp310-win_amd64.whl`<br>OR<br>(A1111 Portable)`system\python\python.exe -m pip install insightface-0.7.3-cp310-cp310-win_amd64.whl`
