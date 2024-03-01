@@ -40,6 +40,9 @@
 
 ## What's new in the latest updates
 
+<details>
+	<summary><a>Click to expand</a></summary>
+
 ### 0.7.0 <sub><sup>ALPHA1
 
 - You can now blend faces to build blended face models ("Tools->Face Models->Blend") - due to popular demand
@@ -80,11 +83,13 @@
 
 <img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/face_model_demo_01.jpg?raw=true" alt="0.5.0-whatsnew-01" width="100%"/>
 
+</details>
+
 ## Installation
 
-[Automatic1111](#a1111) | [Vladmandic SD.Next](#sdnext) | [Google Colab SD WebUI](#colab)
+[A1111 WebUI / WebUI-Forge](#a1111) | [SD.Next](#sdnext) | [Google Colab SD WebUI](#colab)
 
-<a name="a1111">If you use [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/):
+<a name="a1111">If you use [AUTOMATIC1111 SD WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) or [SD WebUI Forge](https://github.com/lllyasviel/stable-diffusion-webui-forge):
 
 1. (For Windows Users):
   - Install **Visual Studio 2022** (Community version, for example - you need this step to build some of dependencies):

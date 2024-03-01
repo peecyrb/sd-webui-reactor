@@ -39,6 +39,9 @@
 
 ## Что нового в последних обновлениях
 
+<details>
+	<summary><a>Нажмите, чтобы посмотреть</a></summary>
+
 ### 0.7.0 <sub><sup>ALPHA1
 
 - По многочисленным просьбам появилась возможность строить смешанные модели лиц ("Tools->Face Models->Blend")
@@ -79,13 +82,15 @@
 
 <img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/face_model_demo_01.jpg?raw=true" alt="0.5.0-whatsnew-01" width="100%"/>
 
+</details>
+
 <a name="installation">
 
 ## Установка
 
-[Automatic1111](#a1111) | [Vladmandic SD.Next](#sdnext) | [Google Colab SD WebUI](#colab)
+[A1111 WebUI / WebUI-Forge](#a1111) | [SD.Next](#sdnext) | [Google Colab SD WebUI](#colab)
 
-<a name="a1111">Если вы используете [AUTOMATIC1111 Web-UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/):
+<a name="a1111">Если вы используете [AUTOMATIC1111 SD WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) или [SD WebUI Forge](https://github.com/lllyasviel/stable-diffusion-webui-forge):
 
 1. (Для пользователей Windows):
   - Установите **Visual Studio 2022** (Например, версию Community - этот шаг нужен для правильной компиляции библиотеки Insightface):
