@@ -2,7 +2,7 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_NEW_RU.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.7.0_alpha2-lightgreen?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/версия-0.7.0_beta1-green?style=for-the-badge&labelColor=darkgreen)
   
   <a href="https://boosty.to/artgourieff" target="_blank">
     <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Поддержать проект на Boosty"/>
@@ -41,6 +41,14 @@
 
 <details>
 	<summary><a>Нажмите, чтобы посмотреть</a></summary>
+
+### 0.7.0 <sub><sup>BETA1
+
+- Поддержка X/Y/Z скрипта (до 3-х параметров: CodeFormer Weight, Restorer Visibility, Face Mask Correction)
+
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-03.jpg?raw=true" alt="0.7.0-whatsnew-03" width="100%"/>
+
+Full size demo image: [xyz_demo.png](https://raw.githubusercontent.com/Gourieff/Assets/main/sd-webui-reactor/xyz_demo.png)
 
 ### 0.7.0 <sub><sup>ALPHA1
 
