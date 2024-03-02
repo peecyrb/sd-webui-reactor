@@ -256,6 +256,7 @@ class FaceSwapScript(scripts.Script):
                 self.face_restorer_visibility = shared.opts.data['restorer_visibility'] if 'restorer_visibility' in shared.opts.data.keys() else 1
                 self.codeformer_weight = shared.opts.data['codeformer_weight'] if 'codeformer_weight' in shared.opts.data.keys() else 0.5
                 self.mask_face = shared.opts.data['mask_face'] if 'mask_face' in shared.opts.data.keys() else False
+                self.face_model = shared.opts.data['face_model'] if 'face_model' in shared.opts.data.keys() else "None"
 
             logger.debug("*** Set Device")
             set_Device(self.device)

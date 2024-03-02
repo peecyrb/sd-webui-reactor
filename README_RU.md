@@ -2,7 +2,7 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_NEW_RU.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.7.0_beta1-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/версия-0.7.0_beta2-green?style=for-the-badge&labelColor=darkgreen)
   
   <a href="https://boosty.to/artgourieff" target="_blank">
     <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Поддержать проект на Boosty"/>
@@ -42,13 +42,24 @@
 <details>
 	<summary><a>Нажмите, чтобы посмотреть</a></summary>
 
+### 0.7.0 <sub><sup>BETA2
+
+- X/Y/Z опция улучшена! Добавлен ещё один параметр: теперь вы можете выбрать несколько моделей лиц для создания вариации замененных лиц, чтобы выбрать наилучшие!
+
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-05.jpg?raw=true" alt="0.7.0-whatsnew-05" width="100%"/>
+
+Чтобы использовать ось "Face Model" - активируйте РеАктор и выбирите любую модель лица в качестве источника:<br>
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-07.jpg?raw=true" alt="0.7.0-whatsnew-07" width="50%"/><img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-06.jpg?raw=true" alt="0.7.0-whatsnew-06" width="50%"/>
+
+Полноразмерное демо-изображение: [xyz_demo_2.png](https://raw.githubusercontent.com/Gourieff/Assets/main/sd-webui-reactor/xyz_demo_2.png)
+
 ### 0.7.0 <sub><sup>BETA1
 
 - Поддержка X/Y/Z скрипта (до 3-х параметров: CodeFormer Weight, Restorer Visibility, Face Mask Correction)
 
 <img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-03.jpg?raw=true" alt="0.7.0-whatsnew-03" width="100%"/>
 
-Full size demo image: [xyz_demo.png](https://raw.githubusercontent.com/Gourieff/Assets/main/sd-webui-reactor/xyz_demo.png)
+Полноразмерное демо-изображение: [xyz_demo.png](https://raw.githubusercontent.com/Gourieff/Assets/main/sd-webui-reactor/xyz_demo.png)
 
 ### 0.7.0 <sub><sup>ALPHA1
 

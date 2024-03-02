@@ -2,7 +2,7 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_NEW_EN.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/version-0.7.0_beta1-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/version-0.7.0_beta2-green?style=for-the-badge&labelColor=darkgreen)
   
   <a href="https://boosty.to/artgourieff" target="_blank">
     <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Support Me on Boosty"/>
@@ -43,13 +43,28 @@
 <details>
 	<summary><a>Click to expand</a></summary>
 
+### 0.7.0 <sub><sup>BETA2
+
+- X/Y/Z is improved! One more parameter is ready: you can now select several face models to create a variation of swaps to choose the best one!
+
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-05.jpg?raw=true" alt="0.7.0-whatsnew-05" width="100%"/>
+
+To use "Face Model" axis - you should enable ReActor and choose any face model as the Source:<br>
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-07.jpg?raw=true" alt="0.7.0-whatsnew-07" width="50%"/><img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-06.jpg?raw=true" alt="0.7.0-whatsnew-06" width="50%"/>
+
+Full size demo image: [xyz_demo_2.png](https://raw.githubusercontent.com/Gourieff/Assets/main/sd-webui-reactor/xyz_demo_2.png)
+
 ### 0.7.0 <sub><sup>BETA1
 
-- X/Y/Z Script support (up to 3 axis: CodeFormer Weight, Restorer Visibility, Face Mask Correction)
+- X/Y/Z Script support (up to 3 axes: CodeFormer Weight, Restorer Visibility, Face Mask Correction)
 
 <img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-03.jpg?raw=true" alt="0.7.0-whatsnew-03" width="100%"/>
 
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-04.jpg?raw=true" alt="0.7.0-whatsnew-04" width="100%"/>
+
 Full size demo image: [xyz_demo.png](https://raw.githubusercontent.com/Gourieff/Assets/main/sd-webui-reactor/xyz_demo.png)
+
+__Don't forget to enable ReActor and set any source (to prevent "no source" error)__
 
 ### 0.7.0 <sub><sup>ALPHA1
 
