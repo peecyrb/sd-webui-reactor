@@ -166,13 +166,14 @@ def restore_face(image: Image, enhancement_options: EnhancementOptions):
     
     if enhancement_options.face_restorer is not None:
         original_image = result_image.copy()
-        logger.status("Restoring the face with %s", enhancement_options.face_restorer.name())
         numpy_image = np.array(result_image)
         if enhancement_options.face_restorer.name() == "CodeFormer":
+            logger.status("Restoring the face with %s (weight: %s)", enhancement_options.face_restorer.name(), enhancement_options.codeformer_weight)
             numpy_image = codeformer_model.codeformer.restore(
                 numpy_image, w=enhancement_options.codeformer_weight
             )
         else: # GFPGAN:
+            logger.status("Restoring the face with %s", enhancement_options.face_restorer.name())
             numpy_image = gfpgan_model.gfpgan_fix_faces(numpy_image)
             # numpy_image = enhancement_options.face_restorer.restore(numpy_image)
         restored_image = Image.fromarray(numpy_image)
@@ -554,10 +555,10 @@ def swap_face(
                 source_face_model = [load_face_model(face_model)]
                 if source_face_model is not None:
                     source_faces_index = [0]
-                    source_faces = source_face_model                  
-                    logger.status("Using Loaded Source Face Model...")
+                    source_faces = source_face_model
+                    logger.status(f"Using Loaded Source Face Model: {face_model}")
                 else:
-                    logger.error(f"Cannot load Face Model File: {face_model}.safetensors")
+                    logger.error(f"Cannot load Face Model File: {face_model}")
             
             else:
                 logger.error("Cannot detect any Source")
