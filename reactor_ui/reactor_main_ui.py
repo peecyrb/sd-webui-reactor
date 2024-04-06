@@ -85,16 +85,21 @@ def show(is_img2img: bool, show_br: bool = True, **msgs):
                 imgs_hash_clear.click(clear_faces_list,None,[progressbar_area])
             gr.Markdown("<br>", visible=show_br)
             with gr.Column(visible=True) as control_col_1:
-                gr.Markdown("<center>🔽🔽🔽 Single Image has priority when both Areas in use 🔽🔽🔽</center>")
                 with gr.Row():
-                    img = gr.Image(
-                        type="pil",
-                        label="Single Source Image",
-                    )
-                    imgs = gr.Files(
-                        label=f"Multiple Source Images{msgs['extra_multiple_source']}",
-                        file_types=["image"],
-                    )
+                    selected_tab = gr.Textbox('tab_single', visible=False)
+                    with gr.Tabs() as tab_single:
+                        with gr.Tab('Single'):
+                            img = gr.Image(
+                                type="pil",
+                                label="Single Source Image",
+                            )
+                        with gr.Tab('Multiple') as tab_multiple:
+                            imgs = gr.Files(
+                                label=f"Multiple Source Images{msgs['extra_multiple_source']}",
+                                file_types=["image"],
+                            )
+                    tab_single.select(fn=lambda: 'tab_single', inputs=[], outputs=[selected_tab])
+                    tab_multiple.select(fn=lambda: 'tab_multiple', inputs=[], outputs=[selected_tab])
             with gr.Column(visible=False) as control_col_3:
                 gr.Markdown("<span style='display:block;text-align:right;padding-right:3px;margin: -15px 0;font-size:1.1em'><sup>Clear Hash if you see the previous face was swapped instead of the new one</sup></span>")
                 with gr.Row():
@@ -189,4 +194,4 @@ def show(is_img2img: bool, show_br: bool = True, **msgs):
     # select_source.select(on_select_source,[save_original],[control_col_1,control_col_2,control_col_3,save_original,imgs_hash_clear],show_progress=False)
     select_source.select(on_select_source,None,[control_col_1,control_col_2,control_col_3,imgs_hash_clear],show_progress=False)
 
-    return img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image
+    return img, imgs, selected_tab, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image
