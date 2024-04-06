@@ -39,7 +39,7 @@ def show():
                             value="Mean",
                             label="Compute Method",
                             type="index",
-                            info="Mean (recommended) - Average value (best result 👍); Median* - Mid-point value (may be funny 😅); Mode - Most common value (may be scary 😨); *Mean and Median will be simillar if you load two images"
+                            info="Mean (recommended) - Average value (best result 👍); Median* - Mid-point value (may be funny 😅); Mode - Most common value (may be scary 😨); *Mean and Median will be similar if you load two images"
                         )
                         shape_check = gr.Checkbox(
                             False,
