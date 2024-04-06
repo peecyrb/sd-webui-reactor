@@ -508,7 +508,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
 
             # TAB MAIN
             msgs: dict = {
-                "extra_multiple_source": " | Сomparison grid as a result",
+                "extra_multiple_source": "",
             }
             img, imgs, selected_tab, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image = ui_main.show(is_img2img=False, show_br=False, **msgs)
             
@@ -699,9 +699,13 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                     if len(result) > 0 and swapped > 0:
                         image = result[0]
                         if len(result) > 1:
-                            grid = make_grid(result)
-                            result.insert(0, grid)
-                            image = grid
+                            if hasattr(pp, 'extra_images'):
+                                image = result[0]
+                                pp.extra_images.extend(result[1:])
+                            else:
+                                grid = make_grid(result)
+                                result.insert(0, grid)
+                                image = grid
                         pp.info["ReActor"] = True
                         pp.image = image
                         logger.status("---Done!---")
