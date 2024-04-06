@@ -6,7 +6,7 @@ from typing import List
 
 import modules.scripts as scripts
 from modules.upscaler import Upscaler, UpscalerData
-from modules import scripts, shared, images, scripts_postprocessing, ui_components
+from modules import scripts, shared, images, scripts_postprocessing
 from modules.processing import (
     Processed,
     StableDiffusionProcessing,
@@ -39,6 +39,20 @@ from scripts.reactor_helpers import (
 )
 from scripts.reactor_globals import SWAPPER_MODELS_PATH #, DEVICE, DEVICE_LIST
 
+def IA_cap(cond: bool, label: str=""):
+    return None
+
+try:
+    from modules.ui_components import InputAccordion
+    NO_IA = False
+except:
+    NO_IA = True
+    InputAccordion = IA_cap
+
+
+def check_old_webui():
+    return NO_IA
+
 
 class FaceSwapScript(scripts.Script):
     def title(self):
@@ -48,19 +62,12 @@ class FaceSwapScript(scripts.Script):
         return scripts.AlwaysVisible
 
     def ui(self, is_img2img):
-        with ui_components.InputAccordion(False, label=f"{app_title}") as enable:
-        # with gr.Accordion(f"{app_title}", open=False):
+        with (
+            gr.Accordion(f"{app_title}", open=False) if check_old_webui() else InputAccordion(False, label=f"{app_title}") as enable
+        ):
 
-            # def on_files_upload_uncheck_so(selected: bool):
-            #     global SAVE_ORIGINAL
-            #     SAVE_ORIGINAL = selected
-            #     return gr.Checkbox.update(value=False,visible=False)
-            # def on_files_clear():
-            #     clear_faces_list()
-            #     return gr.Checkbox.update(value=SAVE_ORIGINAL,visible=True)
-
-            # SD.Next fix
-            if get_SDNEXT():
+            # SD.Next or A1111 1.52:
+            if get_SDNEXT() or check_old_webui():
                 enable = gr.Checkbox(False, label="Enable")
             
             # enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
@@ -488,11 +495,14 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
     order = 20000
 
     def ui(self):
-        with ui_components.InputAccordion(False, label=f"{app_title}") as enable:
+        with (
+            gr.Accordion(f"{app_title}", open=False) if check_old_webui() else InputAccordion(False, label=f"{app_title}") as enable
+        ):
+        # with ui_components.InputAccordion(False, label=f"{app_title}") as enable:
         # with gr.Accordion(f"{app_title}", open=False):
             
-            # SD.Next fix
-            if get_SDNEXT():
+            # SD.Next or A1111 1.52:
+            if get_SDNEXT() or check_old_webui():
                 enable = gr.Checkbox(False, label="Enable")
 
             # enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
