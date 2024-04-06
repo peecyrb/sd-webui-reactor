@@ -10,6 +10,7 @@ from scripts.reactor_helpers import (
     get_facemodels
 )
 
+
 # xyz_grid = [x for x in scripts.scripts_data if x.script_class.__module__ == "xyz_grid.py"][0].module
 
 def find_module(module_names):
@@ -84,3 +85,10 @@ def run():
     xyz_grid = find_module("xyz_grid.py, xy_grid.py")
     if xyz_grid:
         add_axis_options(xyz_grid)
+
+# XYZ init:
+try:
+    import modules.script_callbacks as script_callbacks
+    script_callbacks.on_before_ui(run)
+except:
+    pass
