@@ -77,7 +77,7 @@ class FaceSwapScript(scripts.Script):
             msgs: dict = {
                 "extra_multiple_source": "",
             }
-            img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image = ui_main.show(is_img2img=is_img2img, **msgs)
+            img, imgs, selected_tab, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image = ui_main.show(is_img2img=is_img2img, **msgs)
             
             # TAB DETECTION
             det_thresh, det_maxnum = ui_detection.show()
@@ -123,7 +123,8 @@ class FaceSwapScript(scripts.Script):
             random_image,
             upscale_force,
             det_thresh,
-            det_maxnum
+            det_maxnum,
+            selected_tab,
         ]
 
 
@@ -193,7 +194,8 @@ class FaceSwapScript(scripts.Script):
         random_image,
         upscale_force,
         det_thresh,
-        det_maxnum
+        det_maxnum,
+        selected_tab,
     ):
         self.enable = enable
         if self.enable:
@@ -205,7 +207,10 @@ class FaceSwapScript(scripts.Script):
                 return
             
             global SWAPPER_MODELS_PATH
-            self.source = img
+            if selected_tab == "tab_single":
+                self.source = img
+            else:
+                self.source = None
             self.face_restorer_name = face_restorer_name
             self.upscaler_scale = upscaler_scale
             self.upscaler_visibility = upscaler_visibility
@@ -227,7 +232,10 @@ class FaceSwapScript(scripts.Script):
             self.select_source = select_source
             self.face_model = face_model
             self.source_folder = source_folder
-            self.source_imgs = imgs
+            if selected_tab == "tab_single":
+                self.source_imgs = None
+            else:
+                self.source_imgs = imgs
             self.random_image = random_image
             self.upscale_force = upscale_force
             self.det_thresh=det_thresh
@@ -510,9 +518,9 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
 
             # TAB MAIN
             msgs: dict = {
-                "extra_multiple_source": " | Сomparison grid as a result",
+                "extra_multiple_source": "",
             }
-            img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image = ui_main.show(is_img2img=False, show_br=False, **msgs)
+            img, imgs, selected_tab, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image = ui_main.show(is_img2img=False, show_br=False, **msgs)
             
             # TAB DETECTION
             det_thresh, det_maxnum = ui_detection.show()
@@ -554,6 +562,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             'upscale_force': upscale_force,
             'det_thresh': det_thresh,
             'det_maxnum': det_maxnum,
+            'selected_tab': selected_tab,
         }
         return args
 
@@ -598,7 +607,10 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                 return
 
             global SWAPPER_MODELS_PATH
-            self.source = args['img']
+            if args['selected_tab'] == "tab_single":
+                self.source = args['img']
+            else:
+                self.source = None
             self.face_restorer_name = args['face_restorer_name']
             self.upscaler_scale = args['upscaler_scale']
             self.upscaler_visibility = args['upscaler_visibility']
@@ -615,7 +627,10 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             self.select_source = args['select_source']
             self.face_model = args['face_model']
             self.source_folder = args['source_folder']
-            self.source_imgs = args['imgs']
+            if args['selected_tab'] == "tab_single":
+                self.source_imgs = None
+            else:
+                self.source_imgs = args['imgs']
             self.random_image = args['random_image']
             self.upscale_force = args['upscale_force']
             self.det_thresh = args['det_thresh']
@@ -694,9 +709,13 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                     if len(result) > 0 and swapped > 0:
                         image = result[0]
                         if len(result) > 1:
-                            grid = make_grid(result)
-                            result.insert(0, grid)
-                            image = grid
+                            if hasattr(pp, 'extra_images'):
+                                image = result[0]
+                                pp.extra_images.extend(result[1:])
+                            else:
+                                grid = make_grid(result)
+                                result.insert(0, grid)
+                                image = grid
                         pp.info["ReActor"] = True
                         pp.image = image
                         logger.status("---Done!---")
